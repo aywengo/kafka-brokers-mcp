@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "kafka-brokers": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network", "host",
+        "-e", "KAFKA_BOOTSTRAP_SERVERS",
+        "-e", "KAFKA_SECURITY_PROTOCOL",
+        "-e", "KAFKA_SASL_MECHANISM",
+        "-e", "KAFKA_SASL_USERNAME",
+        "-e", "KAFKA_SASL_PASSWORD",
+        "-e", "READONLY",
+        "aywengo/kafka-brokers-mcp:stable"
+      ],
+      "env": {
+        "KAFKA_BOOTSTRAP_SERVERS": "localhost:9092",
+        "KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
+        "READONLY": "false"
+      }
+    }
+  }
+}
