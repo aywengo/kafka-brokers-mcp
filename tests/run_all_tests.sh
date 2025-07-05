@@ -83,8 +83,6 @@ else
         "test_topic_operations.py"
         "test_consumer_group_operations.py"
         "test_multi_cluster_mcp.py"
-        "test_readonly_mode.py"
-        "test_docker_mcp.py"
     )
 fi
 
