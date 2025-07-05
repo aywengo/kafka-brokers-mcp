@@ -57,6 +57,10 @@ jobs:
       run: |
         mypy kafka_brokers_unified_mcp.py --ignore-missing-imports
     
+    - name: Make test scripts executable
+      run: |
+        chmod +x tests/*.sh
+    
     - name: Start test environment
       run: |
         cd tests
@@ -234,6 +238,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    
+    - name: Make test scripts executable
+      run: |
+        chmod +x tests/*.sh
     
     - name: Test latest Docker image
       run: |
