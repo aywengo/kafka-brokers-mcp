@@ -3,8 +3,7 @@ mcp[cli]==1.9.2
 fastmcp==2.8.0
 confluent-kafka==2.6.1
 
-# Async and utilities
-asyncio==3.4.3
+# Utilities
 pydantic==2.9.2
 python-json-logger==2.0.7
 
