@@ -1,0 +1,27 @@
+# Ensure shell scripts maintain their line endings and are marked as executable
+*.sh text eol=lf
+
+# Python files
+*.py text
+*.pyi text
+
+# Configuration files
+*.yml text
+*.yaml text
+*.json text
+*.toml text
+*.ini text
+*.cfg text
+
+# Documentation
+*.md text
+*.rst text
+*.txt text
+
+# Docker files
+Dockerfile text
+.dockerignore text
+
+# Git files
+.gitignore text
+.gitattributes text

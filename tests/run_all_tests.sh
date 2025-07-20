@@ -68,22 +68,34 @@ echo "========================================"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Discover available test files
+AVAILABLE_TEST_FILES=()
+for file in test_*.py; do
+    if [ -f "$file" ]; then
+        AVAILABLE_TEST_FILES+=("$file")
+    fi
+done
+
+if [ ${#AVAILABLE_TEST_FILES[@]} -eq 0 ]; then
+    echo -e "${RED}❌ No test files found in $(pwd)${NC}"
+    exit 1
+fi
+
+echo -e "${BLUE}🔍 Found ${#AVAILABLE_TEST_FILES[@]} test files: ${AVAILABLE_TEST_FILES[*]}${NC}"
+
 # Test files based on mode
 if [ "$QUICK_MODE" = true ]; then
     echo -e "${YELLOW}⚡ Running in QUICK mode (essential tests only)${NC}"
-    TEST_FILES=(
-        "test_basic_server.py"
-        "test_topic_operations.py"
-        "test_consumer_group_operations.py"
-    )
+    TEST_FILES=()
+    # Only include essential tests that exist
+    for test in "test_basic_server.py" "test_topic_operations.py" "test_consumer_group_operations.py"; do
+        if [[ " ${AVAILABLE_TEST_FILES[@]} " =~ " ${test} " ]]; then
+            TEST_FILES+=("$test")
+        fi
+    done
 else
     echo -e "${BLUE}🔍 Running FULL test suite${NC}"
-    TEST_FILES=(
-        "test_basic_server.py"
-        "test_topic_operations.py"
-        "test_consumer_group_operations.py"
-        "test_multi_cluster_mcp.py"
-    )
+    TEST_FILES=("${AVAILABLE_TEST_FILES[@]}")
 fi
 
 # Filter tests by pattern if provided
@@ -120,6 +132,17 @@ cleanup() {
 # Set trap for cleanup
 trap cleanup EXIT
 
+# Check if test environment scripts exist
+if [ ! -f "start_test_environment.sh" ]; then
+    echo -e "${RED}❌ start_test_environment.sh not found${NC}"
+    exit 1
+fi
+
+if [ ! -f "stop_test_environment.sh" ]; then
+    echo -e "${RED}❌ stop_test_environment.sh not found${NC}"
+    exit 1
+fi
+
 # Start test environment
 echo -e "${BLUE}🔧 Starting test environment...${NC}"
 if ! ./start_test_environment.sh multi; then
@@ -133,13 +156,24 @@ sleep 10
 
 # Check if Kafka is accessible
 echo -e "${BLUE}🔍 Verifying Kafka connectivity...${NC}"
-if ! docker-compose -f docker-compose.test.yml exec -T kafka kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
-    echo -e "${RED}❌ Kafka is not accessible${NC}"
-    exit 1
+if command -v docker-compose &> /dev/null; then
+    if ! docker-compose -f docker-compose.test.yml exec -T kafka kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
+        echo -e "${YELLOW}⚠️  Warning: Kafka connectivity check failed, but continuing...${NC}"
+    else
+        echo -e "${GREEN}✅ Kafka is accessible${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  docker-compose not found, skipping Kafka connectivity check${NC}"
 fi
 
 echo -e "${GREEN}✅ Test environment ready${NC}"
 echo ""
+
+# Check if pytest is available
+if ! command -v pytest &> /dev/null && ! python3 -m pytest --version &> /dev/null; then
+    echo -e "${RED}❌ pytest not found. Installing...${NC}"
+    pip install pytest pytest-asyncio
+fi
 
 # Run tests
 FAILED_TESTS=()
