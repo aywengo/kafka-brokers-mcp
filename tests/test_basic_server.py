@@ -24,6 +24,7 @@ from kafka_brokers_unified_mcp import (
     KafkaClusterManager, 
     load_cluster_configurations
 )
+from test_utils import run_docker_compose
 
 class TestKafkaClusterManager:
     """Test the KafkaClusterManager class."""
@@ -106,8 +107,8 @@ class TestMCPServerIntegration:
         """Set up test environment."""
         # Check if Kafka is available
         try:
-            result = subprocess.run([
-                'docker-compose', '-f', 'docker-compose.test.yml', 
+            result = run_docker_compose([
+                '-f', 'docker-compose.test.yml', 
                 'exec', '-T', 'kafka', 
                 'kafka-topics', '--bootstrap-server', 'localhost:9092', '--list'
             ], capture_output=True, text=True, timeout=10)

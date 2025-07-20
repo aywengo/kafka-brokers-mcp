@@ -62,6 +62,11 @@ jobs:
       run: |
         chmod +x tests/*.sh scripts/*.sh || true
     
+    - name: Setup Docker Compose
+      run: |
+        # Ensure docker compose is available (V2)
+        docker compose version || (echo "Installing docker-compose" && sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose)
+    
     - name: Start test environment
       run: |
         cd tests
@@ -244,6 +249,11 @@ jobs:
     - name: Fix script permissions
       run: |
         chmod +x tests/*.sh scripts/*.sh || true
+    
+    - name: Setup Docker Compose for integration tests
+      run: |
+        # Ensure docker compose is available (V2)
+        docker compose version || (echo "Installing docker-compose" && sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose)
     
     - name: Test latest Docker image
       run: |
