@@ -45,13 +45,13 @@ if [ "$MODE" != "silent" ]; then
     echo -e "${YELLOW}⏳ Stopping Docker services...${NC}"
 fi
 
-$DOCKER_COMPOSE -f docker-compose.test.yml down 2>/dev/null || true
+$DOCKER_COMPOSE -f docker-compose.yml down 2>/dev/null || true
 
 if [ "$MODE" == "clean" ]; then
     if [ "$MODE" != "silent" ]; then
         echo -e "${YELLOW}🧹 Cleaning up volumes and networks...${NC}"
     fi
-    $DOCKER_COMPOSE -f docker-compose.test.yml down -v --remove-orphans 2>/dev/null || true
+    $DOCKER_COMPOSE -f docker-compose.yml down -v --remove-orphans 2>/dev/null || true
     
     # Remove any dangling volumes
     docker volume prune -f 2>/dev/null || true

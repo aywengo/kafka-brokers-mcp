@@ -37,6 +37,8 @@ class TestMultiClusterConfiguration:
             'KAFKA_BOOTSTRAP_SERVERS_2': 'staging-kafka:9092',
             'KAFKA_SECURITY_PROTOCOL_2': 'SASL_PLAINTEXT',
             'KAFKA_SASL_MECHANISM_2': 'PLAIN',
+            'KAFKA_SASL_USERNAME_2': 'staging-user',
+            'KAFKA_SASL_PASSWORD_2': 'staging-password',
             'READONLY_2': 'false',
             
             'KAFKA_CLUSTER_NAME_3': 'production',
