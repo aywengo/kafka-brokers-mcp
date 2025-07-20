@@ -1,0 +1,41 @@
+name: Format Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main, develop]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Black
+      run: pip install black
+    
+    - name: Run Black formatter check
+      run: |
+        # Run black in check mode
+        if ! black --check --diff --line-length 127 --target-version py311 --target-version py312 .; then
+          echo ""
+          echo "❌ Code formatting issues found!"
+          echo ""
+          echo "To fix locally, run:"
+          echo "  pip install black"
+          echo "  black --line-length 127 --target-version py311 --target-version py312 ."
+          echo ""
+          echo "Or use the provided script:"
+          echo "  chmod +x scripts/fix_formatting.sh"
+          echo "  ./scripts/fix_formatting.sh"
+          exit 1
+        fi
+        echo "✅ All Python files are properly formatted!"
