@@ -18,8 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY kafka_brokers_unified_mcp.py .
-COPY config-examples/ ./config-examples/
-
+COPY kafka_cluster_manager.py .
+COPY kafka_mcp_resources.py .
+COPY kafka_mcp_tools.py .
+    
 # Create non-root user
 RUN groupadd -r kafkamcp && useradd -r -g kafkamcp kafkamcp
 RUN chown -R kafkamcp:kafkamcp /app

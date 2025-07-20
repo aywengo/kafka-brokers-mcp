@@ -9,12 +9,14 @@ This server uses the official MCP Python SDK and communicates via JSON-RPC over 
 ## ✨ Key Features
 
 - **Claude Desktop Compatible**: Direct integration with Claude Desktop via MCP protocol
-- **MCP Tools**: 15+ tools for topic operations, consumer group management, and cluster monitoring
-- **MCP Resources**: Real-time cluster status and configuration information
+- **MCP Tools**: 14 tools for topic operations, consumer group management, and cluster monitoring
+- **MCP Resources**: Real-time cluster status, configuration, and cluster-specific resources
 - **JSON-RPC Protocol**: Standard MCP communication over stdio
 - **Multi-Cluster Support**: Connect to up to 8 Kafka clusters simultaneously
 - **Per-Cluster VIEWONLY Mode**: Individual viewonly protection per cluster for production safety
 - **Cross-Cluster Operations**: Compare topics and consumer groups between clusters
+- **Health Monitoring**: Comprehensive cluster health checks and partition analysis
+- **Load Balancing Analysis**: Broker partition distribution and leader analysis
 - **Authentication Support**: SASL/SSL authentication for secure Kafka connections
 - **confluent-kafka-python**: High-performance Kafka client library
 
@@ -47,21 +49,33 @@ Restart Claude Desktop and start asking about your Kafka clusters!
 ## 📋 Core MCP Tools
 
 ### Topic Management
-- `list_topics` - List all topics with metadata
+- `list_topics(cluster?)` - List all topics with metadata (supports optional cluster parameter)
 - `describe_topic` - Get detailed topic configuration and partition info
-- `create_topic` - Create new topics (if not viewonly)
-- `delete_topic` - Delete topics (if not viewonly)
+- `get_topic_partition_details` - Get detailed partition info for a topic
 
 ### Consumer Group Management
-- `list_consumer_groups` - List all consumer groups
+- `list_consumer_groups(cluster?)` - List all consumer groups (supports optional cluster parameter)
 - `describe_consumer_group` - Get detailed consumer group info and offsets
-- `get_consumer_group_offsets` - Show current offsets and lag
 
 ### Broker Operations
-- `list_brokers` - List all brokers in cluster
-- `describe_broker` - Get broker details and configurations
+- `list_brokers(cluster?)` - List all brokers in cluster (supports optional cluster parameter)
+- `get_broker_partition_count` - Get partition distribution per broker
 - `get_cluster_metadata` - Show cluster-wide information
 - `list_clusters` - Show all configured clusters
+
+### Partition Operations
+- `get_partitions(cluster?, topic?)` - Get partitions with optional cluster and topic filtering
+- `get_partition_leaders` - Get partition leader distribution
+- `find_under_replicated_partitions` - Find unhealthy partitions
+
+### Health & Monitoring
+- `get_cluster_health` - Get comprehensive cluster health information
+- `compare_cluster_topics` - Compare topics between clusters
+
+### MCP Resources
+- Global resources: `kafka://brokers`, `kafka://topics`, `kafka://consumer-groups`, `kafka://partitions`
+- Cluster-specific resources: `kafka://brokers/{name}`, `kafka://topics/{name}`, etc.
+- Cluster status: `kafka://cluster-status`, `kafka://cluster-info`
 
 ## 🔧 Configuration
 
@@ -118,12 +132,37 @@ cd tests
 
 Once connected to Claude Desktop:
 
+### Basic Operations
 - "List all topics in my Kafka cluster"
 - "Show me details about the user-events topic"
 - "What consumer groups are active?"
 - "Describe the consumer group 'analytics-service'"
 - "Show me all brokers in the production cluster"
+
+### Cluster-Specific Operations (NEW)
+- "Get brokers for the production cluster using get_brokers with cluster parameter"
+- "Show me topics in the development cluster only"
+- "Get consumer groups for production cluster using cluster parameter"
+- "Get partitions for user-events topic in production cluster"
+- "Show me partitions for the production cluster"
+
+### Health & Monitoring (NEW)
+- "Check the health of my production cluster"
+- "Find any under-replicated partitions in development"
+- "Show me partition leader distribution for production"
+- "Get broker partition counts to check load balancing"
+- "Analyze topic partition details for high-volume-topic"
+
+### Cross-Cluster Operations
 - "Compare topics between development and production clusters"
+- "Show me brokers across all my clusters"
+- "Which consumer groups exist in both environments?"
+- "Compare partition counts between dev and prod for user-events topic"
+
+### Resource-Based Operations
+- "Access the kafka://cluster-health/production resource"
+- "Get data from kafka://brokers/development"
+- "Show me the kafka://topics/production resource"
 
 ## 🔒 VIEWONLY Mode
 
@@ -153,8 +192,21 @@ When `VIEWONLY=true` is set, the MCP server blocks all modification operations:
 - Cluster health monitoring
 
 ### Real-time Resources
-- `kafka://cluster-status` - Live cluster status
-- `kafka://cluster-info` - Detailed configuration
+
+#### Global Resources
+- `kafka://cluster-status` - Live cluster status across all clusters
+- `kafka://cluster-info` - Detailed configuration for all clusters
+- `kafka://brokers` - All brokers across clusters
+- `kafka://topics` - All topics across clusters
+- `kafka://consumer-groups` - All consumer groups across clusters
+- `kafka://partitions` - All partitions across clusters
+
+#### Cluster-Specific Resources (NEW)
+- `kafka://brokers/{name}` - Brokers for a specific cluster
+- `kafka://topics/{name}` - Topics for a specific cluster
+- `kafka://consumer-groups/{name}` - Consumer groups for a specific cluster
+- `kafka://partitions/{name}` - Partitions for a specific cluster
+- `kafka://cluster-health/{name}` - Health metrics for a specific cluster
 
 ## 📊 Monitoring
 
