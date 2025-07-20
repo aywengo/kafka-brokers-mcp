@@ -281,9 +281,9 @@ def main():
 
     print(f"Using cluster: {cluster_name} ({cluster_config.bootstrap_servers})")
 
-    # Check readonly mode
-    if cluster_config.readonly:
-        print(f"⚠️  Cluster '{cluster_name}' is in readonly mode!")
+    # Check viewonly mode
+    if cluster_config.viewonly:
+        print(f"⚠️  Cluster '{cluster_name}' is in viewonly mode!")
         response = input("Continue anyway? (y/N): ")
         if response.lower() != "y":
             print("Aborted")

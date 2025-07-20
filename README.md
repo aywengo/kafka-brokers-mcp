@@ -13,7 +13,7 @@ This server uses the official MCP Python SDK and communicates via JSON-RPC over 
 - **MCP Resources**: Real-time cluster status and configuration information
 - **JSON-RPC Protocol**: Standard MCP communication over stdio
 - **Multi-Cluster Support**: Connect to up to 8 Kafka clusters simultaneously
-- **Per-Cluster READONLY Mode**: Individual readonly protection per cluster for production safety
+- **Per-Cluster VIEWONLY Mode**: Individual viewonly protection per cluster for production safety
 - **Cross-Cluster Operations**: Compare topics and consumer groups between clusters
 - **Authentication Support**: SASL/SSL authentication for secure Kafka connections
 - **confluent-kafka-python**: High-performance Kafka client library
@@ -49,8 +49,8 @@ Restart Claude Desktop and start asking about your Kafka clusters!
 ### Topic Management
 - `list_topics` - List all topics with metadata
 - `describe_topic` - Get detailed topic configuration and partition info
-- `create_topic` - Create new topics (if not readonly)
-- `delete_topic` - Delete topics (if not readonly)
+- `create_topic` - Create new topics (if not viewonly)
+- `delete_topic` - Delete topics (if not viewonly)
 
 ### Consumer Group Management
 - `list_consumer_groups` - List all consumer groups
@@ -70,7 +70,7 @@ Restart Claude Desktop and start asking about your Kafka clusters!
 ```bash
 export KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
 export KAFKA_SECURITY_PROTOCOL="PLAINTEXT"
-export READONLY="false"
+export VIEWONLY="false"
 ```
 
 ### Multi-Cluster Mode (Up to 8 clusters)
@@ -79,7 +79,7 @@ export READONLY="false"
 # Development cluster
 export KAFKA_CLUSTER_NAME_1="development"
 export KAFKA_BOOTSTRAP_SERVERS_1="dev-kafka:9092"
-export READONLY_1="false"
+export VIEWONLY_1="false"
 
 # Production cluster (with safety)
 export KAFKA_CLUSTER_NAME_2="production"  
@@ -88,7 +88,7 @@ export KAFKA_SECURITY_PROTOCOL_2="SASL_SSL"
 export KAFKA_SASL_MECHANISM_2="SCRAM-SHA-256"
 export KAFKA_SASL_USERNAME_2="prod-user"
 export KAFKA_SASL_PASSWORD_2="prod-password"
-export READONLY_2="true"
+export VIEWONLY_2="true"
 ```
 
 ## 🐳 Development Setup
@@ -125,9 +125,9 @@ Once connected to Claude Desktop:
 - "Show me all brokers in the production cluster"
 - "Compare topics between development and production clusters"
 
-## 🔒 READONLY Mode
+## 🔒 VIEWONLY Mode
 
-When `READONLY=true` is set, the MCP server blocks all modification operations:
+When `VIEWONLY=true` is set, the MCP server blocks all modification operations:
 
 **Blocked Operations:**
 - ❌ Topic creation and deletion
@@ -172,7 +172,9 @@ Following the same patterns as the kafka-schema-reg-mcp project:
 2. Create feature branch
 3. Add tests for new functionality
 4. Ensure all tests pass: `./tests/run_all_tests.sh`
-5. Submit pull request
+5. Update the README.md file with the new functionality.
+6. Fix formatting with `black` and `isort`.
+7. Submit pull request
 
 ## 📄 License
 

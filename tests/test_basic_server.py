@@ -34,7 +34,7 @@ class TestKafkaClusterManager:
         with patch.dict(os.environ, {
             'KAFKA_BOOTSTRAP_SERVERS': 'localhost:9092',
             'KAFKA_SECURITY_PROTOCOL': 'PLAINTEXT',
-            'READONLY': 'false'
+            'VIEWONLY': 'false'
         }, clear=True):
             manager = load_cluster_configurations()
             
@@ -45,7 +45,7 @@ class TestKafkaClusterManager:
             assert config.name == 'default'
             assert config.bootstrap_servers == 'localhost:9092'
             assert config.security_protocol == 'PLAINTEXT'
-            assert config.readonly is False
+            assert config.viewonly is False
     
     def test_multi_cluster_config(self):
         """Test multi-cluster configuration loading."""
@@ -53,14 +53,14 @@ class TestKafkaClusterManager:
             'KAFKA_CLUSTER_NAME_1': 'dev',
             'KAFKA_BOOTSTRAP_SERVERS_1': 'localhost:9092',
             'KAFKA_SECURITY_PROTOCOL_1': 'PLAINTEXT',
-            'READONLY_1': 'false',
+            'VIEWONLY_1': 'false',
             'KAFKA_CLUSTER_NAME_2': 'prod',
             'KAFKA_BOOTSTRAP_SERVERS_2': 'localhost:9093',
             'KAFKA_SECURITY_PROTOCOL_2': 'SASL_SSL',
             'KAFKA_SASL_MECHANISM_2': 'SCRAM-SHA-256',
             'KAFKA_SASL_USERNAME_2': 'prod-user',
             'KAFKA_SASL_PASSWORD_2': 'prod-pass',
-            'READONLY_2': 'true'
+            'VIEWONLY_2': 'true'
         }, clear=True):
             manager = load_cluster_configurations()
             
@@ -71,7 +71,7 @@ class TestKafkaClusterManager:
             dev_config = manager.get_cluster_config('dev')
             assert dev_config.name == 'dev'
             assert dev_config.bootstrap_servers == 'localhost:9092'
-            assert dev_config.readonly is False
+            assert dev_config.viewonly is False
             
             prod_config = manager.get_cluster_config('prod')
             assert prod_config.name == 'prod'
@@ -79,7 +79,7 @@ class TestKafkaClusterManager:
             assert prod_config.security_protocol == 'SASL_SSL'
             assert prod_config.sasl_mechanism == 'SCRAM-SHA-256'
             assert prod_config.sasl_username == 'prod-user'
-            assert prod_config.readonly is True
+            assert prod_config.viewonly is True
     
     def test_no_config_raises_error(self):
         """Test that missing configuration raises appropriate error."""
@@ -87,17 +87,17 @@ class TestKafkaClusterManager:
             with pytest.raises(ValueError, match="No cluster configurations found"):
                 load_cluster_configurations()
     
-    def test_readonly_check(self):
-        """Test readonly mode checking."""
+    def test_viewonly_check(self):
+        """Test viewonly mode checking."""
         config = KafkaClusterConfig(
             name='test',
             bootstrap_servers='localhost:9092',
-            readonly=True
+            viewonly=True
         )
         manager = KafkaClusterManager()
         manager.add_cluster(config)
         
-        assert manager.is_readonly('test') is True
+        assert manager.is_viewonly('test') is True
 
 class TestMCPServerIntegration:
     """Integration tests with actual Kafka clusters."""
@@ -124,7 +124,7 @@ class TestMCPServerIntegration:
         self.env_patch = patch.dict(os.environ, {
             'KAFKA_BOOTSTRAP_SERVERS': 'localhost:9092',
             'KAFKA_SECURITY_PROTOCOL': 'PLAINTEXT',
-            'READONLY': 'false'
+            'VIEWONLY': 'false'
         })
         self.env_patch.start()
         
@@ -253,42 +253,42 @@ class TestMCPServerIntegration:
         assert config.bootstrap_servers == 'localhost:9092'
         assert config.security_protocol == 'PLAINTEXT'
 
-class TestReadonlyMode:
-    """Test readonly mode functionality."""
+class TestViewonlyMode:
+    """Test viewonly mode functionality."""
     
-    def test_readonly_flag_detection(self):
-        """Test that readonly flag is properly detected."""
+    def test_viewonly_flag_detection(self):
+        """Test that viewonly flag is properly detected."""
         config = KafkaClusterConfig(
-            name='readonly-cluster',
+            name='viewonly-cluster',
             bootstrap_servers='localhost:9092',
-            readonly=True
+            viewonly=True
         )
         
         manager = KafkaClusterManager()
         manager.add_cluster(config)
         
-        assert manager.is_readonly('readonly-cluster') is True
+        assert manager.is_viewonly('viewonly-cluster') is True
     
-    def test_multi_cluster_readonly_modes(self):
-        """Test different readonly modes across clusters."""
+    def test_multi_cluster_viewonly_modes(self):
+        """Test different viewonly modes across clusters."""
         dev_config = KafkaClusterConfig(
             name='dev',
             bootstrap_servers='localhost:9092',
-            readonly=False
+            viewonly=False
         )
         
         prod_config = KafkaClusterConfig(
             name='prod',
             bootstrap_servers='localhost:9093',
-            readonly=True
+            viewonly=True
         )
         
         manager = KafkaClusterManager()
         manager.add_cluster(dev_config)
         manager.add_cluster(prod_config)
         
-        assert manager.is_readonly('dev') is False
-        assert manager.is_readonly('prod') is True
+        assert manager.is_viewonly('dev') is False
+        assert manager.is_viewonly('prod') is True
 
 class TestErrorHandling:
     """Test error handling scenarios."""

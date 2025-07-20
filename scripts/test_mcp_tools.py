@@ -174,7 +174,7 @@ def check_environment():
     if single_cluster:
         print(f"Single cluster mode detected: {single_cluster}")
         print(f"Security protocol: {os.getenv('KAFKA_SECURITY_PROTOCOL', 'PLAINTEXT')}")
-        print(f"Readonly mode: {os.getenv('READONLY', 'false')}")
+        print(f"Viewonly mode: {os.getenv('VIEWONLY', 'false')}")
         return True
 
     # Check for multi-cluster configuration
@@ -185,8 +185,8 @@ def check_environment():
         if name and servers:
             cluster_count += 1
             print(f"Cluster {i}: {name} -> {servers}")
-            readonly = os.getenv(f"READONLY_{i}", "false")
-            print(f"  Readonly: {readonly}")
+            viewonly = os.getenv(f"VIEWONLY_{i}", "false")
+            print(f"  Viewonly: {viewonly}")
 
     if cluster_count > 0:
         print(f"\nMulti-cluster mode detected: {cluster_count} clusters")
@@ -267,12 +267,12 @@ def main():
         print("  Single cluster:")
         print("    KAFKA_BOOTSTRAP_SERVERS - Kafka broker endpoints")
         print("    KAFKA_SECURITY_PROTOCOL - Security protocol (default: PLAINTEXT)")
-        print("    READONLY - Enable readonly mode (default: false)")
+        print("    VIEWONLY - Enable viewonly mode (default: false)")
         print("")
         print("  Multi-cluster:")
         print("    KAFKA_CLUSTER_NAME_X - Cluster name (X=1-8)")
         print("    KAFKA_BOOTSTRAP_SERVERS_X - Cluster endpoints")
-        print("    READONLY_X - Per-cluster readonly mode")
+        print("    VIEWONLY_X - Per-cluster viewonly mode")
         return
 
     try:

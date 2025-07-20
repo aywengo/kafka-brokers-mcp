@@ -16,7 +16,7 @@ This directory contains pre-configured Claude Desktop configuration examples for
 
 **`claude_desktop_multi_cluster_config.json`**
 - Supports multiple Kafka clusters (development + production)
-- Per-cluster readonly protection
+- Per-cluster viewonly protection
 - Different authentication methods per cluster
 - Perfect for DevOps teams
 
@@ -56,7 +56,7 @@ copy claude_desktop_stable_config.json %APPDATA%\Claude\claude_desktop_config.js
 | `KAFKA_SASL_MECHANISM` | SASL mechanism | (empty) | `SCRAM-SHA-256` |
 | `KAFKA_SASL_USERNAME` | SASL username | (empty) | `kafka-user` |
 | `KAFKA_SASL_PASSWORD` | SASL password | (empty) | `secret-password` |
-| `READONLY` | Enable readonly mode | `false` | `true` |
+| `VIEWONLY` | Enable viewonly mode | `false` | `true` |
 
 ### Multi-Cluster Mode
 
@@ -68,19 +68,19 @@ copy claude_desktop_stable_config.json %APPDATA%\Claude\claude_desktop_config.js
 | `KAFKA_SASL_MECHANISM_X` | SASL mechanism | `SCRAM-SHA-256` |
 | `KAFKA_SASL_USERNAME_X` | SASL username | `prod-user` |
 | `KAFKA_SASL_PASSWORD_X` | SASL password | `prod-password` |
-| `READONLY_X` | Per-cluster readonly | `true` |
+| `VIEWONLY_X` | Per-cluster viewonly | `true` |
 
 ## Security Best Practices
 
 ### Production Environment
-- Always use `READONLY=true` for production clusters
+- Always use `VIEWONLY=true` for production clusters
 - Use strong authentication (SASL/SSL)
 - Store credentials securely
 - Regularly rotate passwords
 
 ### Development Environment
 - Use separate dev clusters
-- Enable full access (`READONLY=false`)
+- Enable full access (`VIEWONLY=false`)
 - Use simple authentication for testing
 
 ## Troubleshooting

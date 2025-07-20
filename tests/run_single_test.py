@@ -14,18 +14,18 @@ def setup_test_environment():
     test_env = {
         'KAFKA_BOOTSTRAP_SERVERS': 'localhost:9092',
         'KAFKA_SECURITY_PROTOCOL': 'PLAINTEXT', 
-        'READONLY': 'false',
+        'VIEWONLY': 'false',
         
         # Multi-cluster configuration for comprehensive tests
         'KAFKA_CLUSTER_NAME_1': 'dev',
         'KAFKA_BOOTSTRAP_SERVERS_1': 'localhost:9092',
         'KAFKA_SECURITY_PROTOCOL_1': 'PLAINTEXT',
-        'READONLY_1': 'false',
+        'VIEWONLY_1': 'false',
         
         'KAFKA_CLUSTER_NAME_2': 'prod', 
         'KAFKA_BOOTSTRAP_SERVERS_2': 'localhost:39093',
         'KAFKA_SECURITY_PROTOCOL_2': 'PLAINTEXT',
-        'READONLY_2': 'false'
+        'VIEWONLY_2': 'false'
     }
     
     for key, value in test_env.items():

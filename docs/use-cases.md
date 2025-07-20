@@ -38,16 +38,16 @@ The Kafka Brokers MCP Server enables natural language interaction with Kafka clu
 # Multi-cluster setup for ops team
 export KAFKA_CLUSTER_NAME_1="development"
 export KAFKA_BOOTSTRAP_SERVERS_1="dev-kafka:9092"
-export READONLY_1="false"
+export VIEWONLY_1="false"
 
 export KAFKA_CLUSTER_NAME_2="staging"
 export KAFKA_BOOTSTRAP_SERVERS_2="staging-kafka:9092" 
-export READONLY_2="false"
+export VIEWONLY_2="false"
 
 export KAFKA_CLUSTER_NAME_3="production"
 export KAFKA_BOOTSTRAP_SERVERS_3="prod-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL_3="SASL_SSL"
-export READONLY_3="true"  # Production safety
+export VIEWONLY_3="true"  # Production safety
 ```
 
 ### 2. Development and Debugging
@@ -159,7 +159,7 @@ export KAFKA_BOOTSTRAP_SERVERS_2="analytics-kafka:9092"
 # High-security configuration
 export KAFKA_SECURITY_PROTOCOL="SASL_SSL"
 export KAFKA_SASL_MECHANISM="SCRAM-SHA-256"
-export READONLY="true"  # Read-only for compliance
+export VIEWONLY="true"  # Read-only for compliance
 ```
 
 **Common Prompts**:
@@ -210,18 +210,18 @@ export KAFKA_BOOTSTRAP_SERVERS_2="analytics-kafka:9092"
 # Development
 export KAFKA_CLUSTER_NAME_1="dev"
 export KAFKA_BOOTSTRAP_SERVERS_1="dev-kafka:9092"
-export READONLY_1="false"
+export VIEWONLY_1="false"
 
 # Staging
 export KAFKA_CLUSTER_NAME_2="staging"
 export KAFKA_BOOTSTRAP_SERVERS_2="staging-kafka:9092"
-export READONLY_2="false"
+export VIEWONLY_2="false"
 
 # Production
 export KAFKA_CLUSTER_NAME_3="prod"
 export KAFKA_BOOTSTRAP_SERVERS_3="prod-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL_3="SASL_SSL"
-export READONLY_3="true"
+export VIEWONLY_3="true"
 ```
 
 **Claude Prompts**:
@@ -291,9 +291,9 @@ curl -X POST "http://kafka-brokers-mcp:8000" \
 
 ### Security
 
-1. **Readonly Mode for Production**:
+1. **Viewonly Mode for Production**:
    ```bash
-   export READONLY="true"  # Prevent accidental modifications
+   export VIEWONLY="true"  # Prevent accidental modifications
    ```
 
 2. **Secure Authentication**:
@@ -311,7 +311,7 @@ curl -X POST "http://kafka-brokers-mcp:8000" \
 1. **Multi-Cluster Setup**:
    - Separate development, staging, and production clusters
    - Use descriptive cluster names
-   - Apply appropriate readonly settings
+   - Apply appropriate viewonly settings
 
 2. **Monitoring Strategy**:
    - Regular health checks via Claude prompts
@@ -362,7 +362,7 @@ curl -X POST "http://kafka-brokers-mcp:8000" \
 # Single cluster for development
 export KAFKA_BOOTSTRAP_SERVERS="dev-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL="PLAINTEXT"
-export READONLY="false"
+export VIEWONLY="false"
 ```
 
 ### Operations Team Setup
@@ -371,12 +371,12 @@ export READONLY="false"
 export KAFKA_CLUSTER_NAME_1="production-us-east"
 export KAFKA_BOOTSTRAP_SERVERS_1="prod-east-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL_1="SASL_SSL"
-export READONLY_1="true"
+export VIEWONLY_1="true"
 
 export KAFKA_CLUSTER_NAME_2="production-us-west"
 export KAFKA_BOOTSTRAP_SERVERS_2="prod-west-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL_2="SASL_SSL"
-export READONLY_2="true"
+export VIEWONLY_2="true"
 ```
 
 ### Analytics Team Setup
@@ -385,7 +385,7 @@ export READONLY_2="true"
 export KAFKA_BOOTSTRAP_SERVERS="analytics-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL="SASL_PLAINTEXT"
 export KAFKA_SASL_MECHANISM="SCRAM-SHA-256"
-export READONLY="true"  # Read-only access for analysts
+export VIEWONLY="true"  # Read-only access for analysts
 ```
 
 This comprehensive use case guide demonstrates the versatility and power of the Kafka Brokers MCP Server across different roles, industries, and operational scenarios.

@@ -46,7 +46,7 @@ class TestTopicOperations:
         self.env_patch = patch.dict(os.environ, {
             'KAFKA_BOOTSTRAP_SERVERS': 'localhost:9092',
             'KAFKA_SECURITY_PROTOCOL': 'PLAINTEXT',
-            'READONLY': 'false'
+            'VIEWONLY': 'false'
         })
         self.env_patch.start()
         
@@ -277,7 +277,7 @@ class TestTopicValidation:
         self.env_patch = patch.dict(os.environ, {
             'KAFKA_BOOTSTRAP_SERVERS': 'localhost:9092',
             'KAFKA_SECURITY_PROTOCOL': 'PLAINTEXT',
-            'READONLY': 'false'
+            'VIEWONLY': 'false'
         })
         self.env_patch.start()
         self.manager = load_cluster_configurations()
