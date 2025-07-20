@@ -9,7 +9,7 @@ python-json-logger==2.0.7
 
 # Authentication (optional)
 authlib==1.5.2
-httpx==0.27.2
+httpx==0.28.1
 
 # Development and testing
 pytest==8.3.3
