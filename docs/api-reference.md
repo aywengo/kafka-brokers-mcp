@@ -55,6 +55,230 @@ Provides detailed cluster configuration information.
 }
 ```
 
+### kafka://brokers
+
+Provides real-time broker information across all clusters.
+
+**Returns:** JSON string with broker details for all clusters
+
+```json
+{
+  "brokers": {
+    "default": [
+      {
+        "broker_id": 1,
+        "host": "localhost",
+        "port": 9092,
+        "rack": null,
+        "cluster": "default"
+      }
+    ]
+  },
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://topics
+
+Provides real-time topic information across all clusters.
+
+**Returns:** JSON string with topic details for all clusters
+
+```json
+{
+  "topics": {
+    "default": [
+      {
+        "name": "user-events",
+        "partitions": 6,
+        "replication_factor": 3,
+        "internal": false,
+        "cluster": "default"
+      }
+    ]
+  },
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://consumer-groups
+
+Provides real-time consumer group information across all clusters.
+
+**Returns:** JSON string with consumer group details for all clusters
+
+```json
+{
+  "consumer_groups": {
+    "default": [
+      {
+        "group_id": "analytics-service",
+        "is_simple_consumer_group": false,
+        "state": "STABLE",
+        "cluster": "default"
+      }
+    ]
+  },
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://partitions
+
+Provides real-time partition information across all clusters.
+
+**Returns:** JSON string with partition details for all clusters
+
+```json
+{
+  "partitions": {
+    "default": [
+      {
+        "topic": "user-events",
+        "partition_id": 0,
+        "leader": 1,
+        "replicas": [1, 2, 3],
+        "in_sync_replicas": [1, 2, 3],
+        "error": null,
+        "cluster": "default"
+      }
+    ]
+  },
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://brokers/{name}
+
+Provides real-time broker information for a specific cluster.
+
+**Parameters:**
+- `name`: Cluster name
+
+**Returns:** JSON string with broker details for the specified cluster
+
+```json
+{
+  "cluster": "production",
+  "brokers": [
+    {
+      "broker_id": 1,
+      "host": "prod-kafka-1",
+      "port": 9092,
+      "rack": "rack-1",
+      "cluster": "production"
+    }
+  ],
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://topics/{name}
+
+Provides real-time topic information for a specific cluster.
+
+**Parameters:**
+- `name`: Cluster name
+
+**Returns:** JSON string with topic details for the specified cluster
+
+```json
+{
+  "cluster": "production",
+  "topics": [
+    {
+      "name": "user-events",
+      "partitions": 6,
+      "replication_factor": 3,
+      "internal": false,
+      "cluster": "production"
+    }
+  ],
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://consumer-groups/{name}
+
+Provides real-time consumer group information for a specific cluster.
+
+**Parameters:**
+- `name`: Cluster name
+
+**Returns:** JSON string with consumer group details for the specified cluster
+
+```json
+{
+  "cluster": "production",
+  "consumer_groups": [
+    {
+      "group_id": "analytics-service",
+      "is_simple_consumer_group": false,
+      "state": "STABLE",
+      "cluster": "production"
+    }
+  ],
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://partitions/{name}
+
+Provides real-time partition information for a specific cluster.
+
+**Parameters:**
+- `name`: Cluster name
+
+**Returns:** JSON string with partition details for the specified cluster
+
+```json
+{
+  "cluster": "production",
+  "partitions": [
+    {
+      "topic": "user-events",
+      "partition_id": 0,
+      "leader": 1,
+      "replicas": [1, 2, 3],
+      "in_sync_replicas": [1, 2, 3],
+      "error": null,
+      "cluster": "production"
+    }
+  ],
+  "timestamp": 1704067200.0
+}
+```
+
+### kafka://cluster-health/{name}
+
+Provides comprehensive health information for a specific cluster.
+
+**Parameters:**
+- `name`: Cluster name
+
+**Returns:** JSON string with health metrics for the specified cluster
+
+```json
+{
+  "cluster": "production",
+  "health_status": "healthy",
+  "cluster_info": {
+    "cluster_id": "kafka-cluster-prod",
+    "controller_id": 1,
+    "bootstrap_servers": "prod-kafka:9092",
+    "viewonly": true
+  },
+  "metrics": {
+    "broker_count": 3,
+    "topic_count": 15,
+    "partition_count": 120,
+    "unhealthy_partitions": 0,
+    "health_percentage": 100.0
+  },
+  "timestamp": 1704067200.0
+}
+```
+
 ## MCP Tools
 
 ### list_clusters()
@@ -293,6 +517,246 @@ Provides comprehensive cluster metadata and statistics.
     "authentication_enabled": true
   }
 }
+```
+
+
+
+
+
+
+
+### get_partitions(cluster: Optional[str] = None, topic: Optional[str] = None)
+
+Get partitions from kafka://partitions resource or cluster-specific resource.
+
+**Parameters:**
+- `cluster` (optional): Cluster name. If specified, uses cluster-specific resource. If not specified, returns partitions from all clusters.
+- `topic` (optional): Topic name. If specified, returns only partitions for that topic.
+
+**Returns:** `List[Dict[str, Any]]`
+
+**Example:**
+```python
+# All clusters, all topics
+[
+  {
+    "topic": "user-events",
+    "partition_id": 0,
+    "leader": 1,
+    "replicas": [1, 2, 3],
+    "in_sync_replicas": [1, 2, 3],
+    "error": null,
+    "cluster": "default"
+  },
+  {
+    "topic": "user-events",
+    "partition_id": 1,
+    "leader": 2,
+    "replicas": [2, 3, 1],
+    "in_sync_replicas": [2, 3, 1],
+    "error": null,
+    "cluster": "production"
+  }
+]
+
+# Specific cluster and topic: get_partitions(cluster="production", topic="user-events")
+[
+  {
+    "topic": "user-events",
+    "partition_id": 1,
+    "leader": 2,
+    "replicas": [2, 3, 1],
+    "in_sync_replicas": [2, 3, 1],
+    "error": null,
+    "cluster": "production"
+  }
+]
+```
+
+### get_cluster_health(cluster: str)
+
+Get comprehensive health information for a specific cluster.
+
+**Parameters:**
+- `cluster`: Name of the cluster
+
+**Returns:** `Dict[str, Any]`
+
+**Example:**
+```python
+{
+  "cluster": "production",
+  "health_status": "healthy",
+  "cluster_info": {
+    "cluster_id": "kafka-cluster-prod",
+    "controller_id": 1,
+    "bootstrap_servers": "prod-kafka:9092",
+    "viewonly": true
+  },
+  "metrics": {
+    "broker_count": 3,
+    "topic_count": 15,
+    "partition_count": 120,
+    "unhealthy_partitions": 0,
+    "health_percentage": 100.0
+  }
+}
+```
+
+### compare_cluster_topics(source_cluster: str, target_cluster: str)
+
+Compare topics between two clusters.
+
+**Parameters:**
+- `source_cluster`: Name of the source cluster
+- `target_cluster`: Name of the target cluster
+
+**Returns:** `Dict[str, Any]`
+
+**Example:**
+```python
+{
+  "source_cluster": "development",
+  "target_cluster": "production",
+  "summary": {
+    "total_source_topics": 5,
+    "total_target_topics": 15,
+    "common_topics": 5,
+    "only_in_source": 0,
+    "only_in_target": 10,
+    "topics_with_differences": 2
+  },
+  "only_in_source": [],
+  "only_in_target": ["prod-only-topic"],
+  "topic_differences": [
+    {
+      "topic": "user-events",
+      "differences": {
+        "partitions": {"source": 3, "target": 6}
+      }
+    }
+  ]
+}
+```
+
+### get_partition_leaders(cluster_name: str)
+
+Get partition leader distribution across brokers for a cluster.
+
+**Parameters:**
+- `cluster_name`: Name of the cluster
+
+**Returns:** `Dict[str, Any]`
+
+**Example:**
+```python
+{
+  "cluster": "production",
+  "total_partitions": 120,
+  "total_brokers": 3,
+  "leader_distribution": [
+    {
+      "broker_id": 1,
+      "host": "kafka-1",
+      "port": 9092,
+      "partition_count": 40,
+      "topics": {"user-events": 6, "orders": 3}
+    }
+  ],
+  "balance_ratio": 0.95
+}
+```
+
+### get_topic_partition_details(cluster_name: str, topic_name: str)
+
+Get detailed partition information for a specific topic.
+
+**Parameters:**
+- `cluster_name`: Name of the cluster
+- `topic_name`: Name of the topic
+
+**Returns:** `Dict[str, Any]`
+
+**Example:**
+```python
+{
+  "cluster": "production",
+  "topic": "user-events",
+  "partition_count": 6,
+  "replication_factor": 3,
+  "health": {
+    "healthy_partitions": 6,
+    "unhealthy_partitions": 0,
+    "health_percentage": 100.0
+  },
+  "partitions": [
+    {
+      "partition_id": 0,
+      "leader": {
+        "broker_id": 1,
+        "host": "kafka-1",
+        "port": 9092
+      },
+      "replicas": [
+        {
+          "broker_id": 1,
+          "host": "kafka-1",
+          "port": 9092,
+          "in_sync": true
+        }
+      ],
+      "is_healthy": true
+    }
+  ]
+}
+```
+
+### find_under_replicated_partitions(cluster_name: str)
+
+Find partitions that are under-replicated (fewer ISRs than replicas).
+
+**Parameters:**
+- `cluster_name`: Name of the cluster
+
+**Returns:** `List[Dict[str, Any]]`
+
+**Example:**
+```python
+[
+  {
+    "topic": "user-events",
+    "partition_id": 2,
+    "leader": 1,
+    "replicas": [1, 2, 3],
+    "in_sync_replicas": [1, 3],
+    "missing_replicas": 1,
+    "replication_factor": 3,
+    "cluster": "production"
+  }
+]
+```
+
+### get_broker_partition_count(cluster_name: str)
+
+Get partition count per broker for load balancing analysis.
+
+**Parameters:**
+- `cluster_name`: Name of the cluster
+
+**Returns:** `List[Dict[str, Any]]`
+
+**Example:**
+```python
+[
+  {
+    "broker_id": 1,
+    "host": "kafka-1",
+    "port": 9092,
+    "leader_count": 40,
+    "replica_count": 120,
+    "topic_count": 15
+  }
+]
 ```
 
 ## Error Handling

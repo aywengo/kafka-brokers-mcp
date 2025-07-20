@@ -15,7 +15,7 @@ import pytest
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from kafka_brokers_unified_mcp import (
+from kafka_cluster_manager import (
     KafkaClusterConfig, 
     KafkaClusterManager, 
     load_cluster_configurations
