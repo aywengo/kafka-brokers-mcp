@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Fix Python code formatting with Black
+# Format all Python code in the project (including scripts and tests)
 
 set -e
 
-echo "🎨 Running Black code formatter..."
+echo "🎨 Formatting all Python code..."
 
 # Check if black is installed
 if ! command -v black &> /dev/null; then
@@ -12,11 +12,11 @@ if ! command -v black &> /dev/null; then
     pip install black
 fi
 
-# Run black on all Python files
+# Format all Python files
 echo "Formatting Python files..."
 black --line-length 127 --target-version py311 --target-version py312 .
 
-echo "✅ Code formatting complete!"
+echo "✅ All code formatting complete!"
 
 # Show which files were reformatted
 if [ -n "$(git status --porcelain)" ]; then

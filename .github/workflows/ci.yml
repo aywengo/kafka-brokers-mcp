@@ -51,7 +51,8 @@ jobs:
     
     - name: Check code formatting with black
       run: |
-        black --check --diff . || (echo "Code formatting issues found. Run 'black .' to fix." && exit 1)
+        # Only check the main module and scripts directory, excluding tests as per pyproject.toml
+        black --check --diff kafka_brokers_unified_mcp.py scripts/ || (echo "Code formatting issues found. Run 'black kafka_brokers_unified_mcp.py scripts/' to fix." && exit 1)
     
     - name: Type checking with mypy
       run: |
@@ -60,6 +61,11 @@ jobs:
     - name: Fix script permissions
       run: |
         chmod +x tests/*.sh scripts/*.sh || true
+    
+    - name: Setup Docker Compose
+      run: |
+        # Ensure docker compose is available (V2)
+        docker compose version || (echo "Installing docker-compose" && sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose)
     
     - name: Start test environment
       run: |
@@ -94,6 +100,10 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -107,7 +117,7 @@ jobs:
         output: 'trivy-results.sarif'
     
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
@@ -243,6 +253,11 @@ jobs:
     - name: Fix script permissions
       run: |
         chmod +x tests/*.sh scripts/*.sh || true
+    
+    - name: Setup Docker Compose for integration tests
+      run: |
+        # Ensure docker compose is available (V2)
+        docker compose version || (echo "Installing docker-compose" && sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose)
     
     - name: Test latest Docker image
       run: |

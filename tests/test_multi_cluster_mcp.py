@@ -20,6 +20,7 @@ from kafka_brokers_unified_mcp import (
     KafkaClusterManager, 
     load_cluster_configurations
 )
+from test_utils import run_docker_compose
 
 class TestMultiClusterConfiguration:
     """Test multi-cluster configuration loading and management."""
@@ -36,6 +37,8 @@ class TestMultiClusterConfiguration:
             'KAFKA_BOOTSTRAP_SERVERS_2': 'staging-kafka:9092',
             'KAFKA_SECURITY_PROTOCOL_2': 'SASL_PLAINTEXT',
             'KAFKA_SASL_MECHANISM_2': 'PLAIN',
+            'KAFKA_SASL_USERNAME_2': 'staging-user',
+            'KAFKA_SASL_PASSWORD_2': 'staging-password',
             'READONLY_2': 'false',
             
             'KAFKA_CLUSTER_NAME_3': 'production',
@@ -160,15 +163,15 @@ class TestMultiClusterOperations:
         # Check if both Kafka clusters are available
         try:
             # Test cluster 1
-            result1 = subprocess.run([
-                'docker-compose', '-f', 'docker-compose.test.yml', 
+            result1 = run_docker_compose([
+                '-f', 'docker-compose.test.yml', 
                 'exec', '-T', 'kafka', 
                 'kafka-topics', '--bootstrap-server', 'localhost:9092', '--list'
             ], capture_output=True, text=True, timeout=10)
             
             # Test cluster 2
-            result2 = subprocess.run([
-                'docker-compose', '-f', 'docker-compose.test.yml', 
+            result2 = run_docker_compose([
+                '-f', 'docker-compose.test.yml', 
                 'exec', '-T', 'kafka-cluster-2', 
                 'kafka-topics', '--bootstrap-server', 'localhost:9093', '--list'
             ], capture_output=True, text=True, timeout=10)

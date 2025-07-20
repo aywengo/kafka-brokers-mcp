@@ -9,6 +9,20 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Function to determine which docker compose command to use
+docker_compose_cmd() {
+    if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+        echo "docker compose"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        echo "docker-compose"
+    else
+        echo -e "${RED}❌ Neither 'docker compose' nor 'docker-compose' is available${NC}" >&2
+        exit 1
+    fi
+}
+
+DOCKER_COMPOSE=$(docker_compose_cmd)
+
 # Default values
 QUICK_MODE=false
 NO_CLEANUP=false
@@ -68,10 +82,10 @@ echo "========================================"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Discover available test files
+# Discover available test files (exclude utility modules)
 AVAILABLE_TEST_FILES=()
 for file in test_*.py; do
-    if [ -f "$file" ]; then
+    if [ -f "$file" ] && [ "$file" != "test_utils.py" ]; then
         AVAILABLE_TEST_FILES+=("$file")
     fi
 done
@@ -156,14 +170,10 @@ sleep 10
 
 # Check if Kafka is accessible
 echo -e "${BLUE}🔍 Verifying Kafka connectivity...${NC}"
-if command -v docker-compose &> /dev/null; then
-    if ! docker-compose -f docker-compose.test.yml exec -T kafka kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠️  Warning: Kafka connectivity check failed, but continuing...${NC}"
-    else
-        echo -e "${GREEN}✅ Kafka is accessible${NC}"
-    fi
+if ! $DOCKER_COMPOSE -f docker-compose.yml exec -T kafka-dev kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Warning: Kafka connectivity check failed, but continuing...${NC}"
 else
-    echo -e "${YELLOW}⚠️  docker-compose not found, skipping Kafka connectivity check${NC}"
+    echo -e "${GREEN}✅ Kafka is accessible${NC}"
 fi
 
 echo -e "${GREEN}✅ Test environment ready${NC}"
@@ -191,7 +201,7 @@ for test_file in "${TEST_FILES[@]}"; do
         PYTEST_ARGS="-v"
     fi
     
-    if python3 -m pytest $PYTEST_ARGS "$test_file" 2>&1; then
+    if python3 run_single_test.py "$test_file" 2>&1; then
         echo -e "${GREEN}✅ PASSED: $test_file${NC}"
         PASSED_TESTS+=("$test_file")
     else
@@ -226,7 +236,7 @@ if [ ${#FAILED_TESTS[@]} -gt 0 ]; then
     echo ""
     echo -e "${RED}💡 To debug failed tests:${NC}"
     echo "  1. Run: ./run_all_tests.sh --no-cleanup --verbose"
-    echo "  2. Access logs: docker-compose -f docker-compose.test.yml logs"
+    echo "  2. Access logs: $DOCKER_COMPOSE -f docker-compose.yml logs"
     echo "  3. Run single test: python3 -m pytest -v -s <test_file>"
     
     exit 1

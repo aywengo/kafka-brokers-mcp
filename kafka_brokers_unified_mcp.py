@@ -275,9 +275,7 @@ async def list_topics(cluster: Optional[str] = None) -> List[Dict[str, Any]]:
 
         # Run in executor to avoid blocking
         loop = asyncio.get_event_loop()
-        metadata = await loop.run_in_executor(
-            cluster_manager.executor, lambda: admin_client.list_topics(timeout=10)
-        )
+        metadata = await loop.run_in_executor(cluster_manager.executor, lambda: admin_client.list_topics(timeout=10))
 
         topics = []
         for topic_name, topic_metadata in metadata.topics.items():
@@ -286,9 +284,7 @@ async def list_topics(cluster: Optional[str] = None) -> List[Dict[str, Any]]:
                     {
                         "name": topic_name,
                         "partitions": len(topic_metadata.partitions),
-                        "replication_factor": len(topic_metadata.partitions[0].replicas)
-                        if topic_metadata.partitions
-                        else 0,
+                        "replication_factor": len(topic_metadata.partitions[0].replicas) if topic_metadata.partitions else 0,
                         "internal": False,
                     }
                 )
@@ -364,9 +360,7 @@ async def list_consumer_groups(cluster: Optional[str] = None) -> List[Dict[str, 
 
         # Run in executor to avoid blocking
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            cluster_manager.executor, lambda: admin_client.list_consumer_groups(timeout=10)
-        )
+        result = await loop.run_in_executor(cluster_manager.executor, lambda: admin_client.list_consumer_groups(timeout=10))
 
         groups = []
         for group in result.result():
@@ -430,9 +424,7 @@ async def describe_consumer_group(group_id: str, cluster: Optional[str] = None) 
                 all_partitions = []
 
                 for topic_name in metadata.topics:
-                    topic_partitions = consumer.list_consumer_group_offsets(
-                        [group_id], [TopicPartition(topic_name)]
-                    )
+                    topic_partitions = consumer.list_consumer_group_offsets([group_id], [TopicPartition(topic_name)])
                     if topic_partitions:
                         all_partitions.extend(topic_partitions)
 
@@ -451,12 +443,11 @@ async def describe_consumer_group(group_id: str, cluster: Optional[str] = None) 
                     "member_id": member.member_id,
                     "client_id": member.client_id,
                     "client_host": member.client_host,
-                    "assignments": [
-                        {"topic": tp.topic, "partition": tp.partition}
-                        for tp in member.assignment.topic_partitions
-                    ]
-                    if member.assignment
-                    else [],
+                    "assignments": (
+                        [{"topic": tp.topic, "partition": tp.partition} for tp in member.assignment.topic_partitions]
+                        if member.assignment
+                        else []
+                    ),
                 }
             )
 
@@ -501,9 +492,7 @@ async def list_brokers(cluster: Optional[str] = None) -> List[Dict[str, Any]]:
 
         # Run in executor to avoid blocking
         loop = asyncio.get_event_loop()
-        metadata = await loop.run_in_executor(
-            cluster_manager.executor, lambda: admin_client.list_topics(timeout=10)
-        )
+        metadata = await loop.run_in_executor(cluster_manager.executor, lambda: admin_client.list_topics(timeout=10))
 
         brokers = []
         for broker_id, broker_metadata in metadata.brokers.items():
@@ -532,9 +521,7 @@ async def get_cluster_metadata(cluster: Optional[str] = None) -> Dict[str, Any]:
 
         # Run in executor to avoid blocking
         loop = asyncio.get_event_loop()
-        metadata = await loop.run_in_executor(
-            cluster_manager.executor, lambda: admin_client.list_topics(timeout=10)
-        )
+        metadata = await loop.run_in_executor(cluster_manager.executor, lambda: admin_client.list_topics(timeout=10))
 
         # Count topics (excluding internal ones)
         user_topics = [name for name in metadata.topics.keys() if not name.startswith("__")]
