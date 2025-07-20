@@ -16,7 +16,7 @@ Provides real-time cluster status information.
     "default": {
       "name": "default",
       "bootstrap_servers": "localhost:9092",
-      "readonly": false,
+      "viewonly": false,
       "topics_count": 5,
       "brokers_count": 1,
       "status": "healthy"
@@ -40,7 +40,7 @@ Provides detailed cluster configuration information.
       "name": "default",
       "bootstrap_servers": "localhost:9092",
       "security_protocol": "PLAINTEXT",
-      "readonly": false,
+      "viewonly": false,
       "authentication": {
         "sasl_mechanism": null,
         "has_credentials": false
@@ -48,7 +48,7 @@ Provides detailed cluster configuration information.
     }
   },
   "configuration": {
-    "readonly_protection": false,
+    "viewonly_protection": false,
     "multi_cluster_mode": false,
     "total_clusters": 1
   }
@@ -72,7 +72,7 @@ Lists all configured Kafka clusters with their status.
     "name": "development",
     "bootstrap_servers": "localhost:9092",
     "security_protocol": "PLAINTEXT",
-    "readonly": false,
+    "viewonly": false,
     "topics_count": 3,
     "brokers_count": 1,
     "status": "healthy"
@@ -81,7 +81,7 @@ Lists all configured Kafka clusters with their status.
     "name": "production",
     "bootstrap_servers": "prod-kafka:9092",
     "security_protocol": "SASL_SSL",
-    "readonly": true,
+    "viewonly": true,
     "topics_count": 15,
     "brokers_count": 3,
     "status": "healthy"
@@ -274,7 +274,7 @@ Provides comprehensive cluster metadata and statistics.
 {
   "cluster_name": "production",
   "bootstrap_servers": "prod-kafka:9092",
-  "readonly": true,
+          "viewonly": true,
   "cluster_id": "kafka-cluster-prod",
   "controller_id": 1,
   "brokers": {
@@ -319,9 +319,9 @@ raise ValueError("Consumer group 'missing-group' not found")
 }
 ```
 
-### Readonly Mode Protection
+### Viewonly Mode Protection
 
-When a cluster is in readonly mode, certain operations are blocked:
+When a cluster is in viewonly mode, certain operations are blocked:
 
 **Blocked Operations:**
 - Topic creation/deletion
@@ -370,7 +370,7 @@ Supports up to 8 clusters with independent configurations:
 export KAFKA_CLUSTER_NAME_1="development"
 export KAFKA_BOOTSTRAP_SERVERS_1="dev-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL_1="PLAINTEXT"
-export READONLY_1="false"
+export VIEWONLY_1="false"
 
 # Cluster 2 - Production
 export KAFKA_CLUSTER_NAME_2="production"
@@ -379,7 +379,7 @@ export KAFKA_SECURITY_PROTOCOL_2="SASL_SSL"
 export KAFKA_SASL_MECHANISM_2="SCRAM-SHA-256"
 export KAFKA_SASL_USERNAME_2="prod-user"
 export KAFKA_SASL_PASSWORD_2="prod-password"
-export READONLY_2="true"
+export VIEWONLY_2="true"
 ```
 
 ## Performance Considerations

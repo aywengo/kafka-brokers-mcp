@@ -2,7 +2,7 @@
 """
 Kafka Brokers MCP Server
 A comprehensive MCP server for Kafka broker operations using confluent-kafka-python.
-Supports single and multi-cluster configurations with readonly mode protection.
+Supports single and multi-cluster configurations with viewonly mode protection.
 """
 
 import asyncio
@@ -39,7 +39,7 @@ class KafkaClusterConfig:
     ssl_ca_location: Optional[str] = None
     ssl_certificate_location: Optional[str] = None
     ssl_key_location: Optional[str] = None
-    readonly: bool = False
+    viewonly: bool = False
 
 
 class KafkaClusterManager:
@@ -107,10 +107,10 @@ class KafkaClusterManager:
 
         return self.clusters[cluster_name]
 
-    def is_readonly(self, cluster_name: Optional[str] = None) -> bool:
-        """Check if cluster is in readonly mode."""
+    def is_viewonly(self, cluster_name: Optional[str] = None) -> bool:
+        """Check if cluster is in viewonly mode."""
         config = self.get_cluster_config(cluster_name)
-        return config.readonly
+        return config.viewonly
 
 
 def load_cluster_configurations() -> KafkaClusterManager:
@@ -130,7 +130,7 @@ def load_cluster_configurations() -> KafkaClusterManager:
             ssl_ca_location=os.getenv("KAFKA_SSL_CA_LOCATION"),
             ssl_certificate_location=os.getenv("KAFKA_SSL_CERTIFICATE_LOCATION"),
             ssl_key_location=os.getenv("KAFKA_SSL_KEY_LOCATION"),
-            readonly=os.getenv("READONLY", "false").lower() == "true",
+            viewonly=os.getenv("VIEWONLY", "false").lower() == "true",
         )
         manager.add_cluster(config)
         logger.info(f"Loaded single cluster configuration: {bootstrap_servers}")
@@ -152,7 +152,7 @@ def load_cluster_configurations() -> KafkaClusterManager:
                 ssl_ca_location=os.getenv(f"KAFKA_SSL_CA_LOCATION_{i}"),
                 ssl_certificate_location=os.getenv(f"KAFKA_SSL_CERTIFICATE_LOCATION_{i}"),
                 ssl_key_location=os.getenv(f"KAFKA_SSL_KEY_LOCATION_{i}"),
-                readonly=os.getenv(f"READONLY_{i}", "false").lower() == "true",
+                viewonly=os.getenv(f"VIEWONLY_{i}", "false").lower() == "true",
             )
             manager.add_cluster(config)
             logger.info(f"Loaded cluster configuration: {name} -> {servers}")
@@ -185,7 +185,7 @@ async def get_cluster_status() -> str:
             status["clusters"][name] = {
                 "name": name,
                 "bootstrap_servers": config.bootstrap_servers,
-                "readonly": config.readonly,
+                "viewonly": config.viewonly,
                 "topics_count": len(metadata.topics),
                 "brokers_count": len(metadata.brokers),
                 "status": "healthy",
@@ -194,7 +194,7 @@ async def get_cluster_status() -> str:
             status["clusters"][name] = {
                 "name": name,
                 "bootstrap_servers": config.bootstrap_servers,
-                "readonly": config.readonly,
+                "viewonly": config.viewonly,
                 "status": "error",
                 "error": str(e),
             }
@@ -209,7 +209,7 @@ async def get_cluster_info() -> str:
         "server_version": "1.0.0",
         "clusters": {},
         "configuration": {
-            "readonly_protection": any(c.readonly for c in cluster_manager.clusters.values()),
+            "viewonly_protection": any(c.viewonly for c in cluster_manager.clusters.values()),
             "multi_cluster_mode": len(cluster_manager.clusters) > 1,
             "total_clusters": len(cluster_manager.clusters),
         },
@@ -220,7 +220,7 @@ async def get_cluster_info() -> str:
             "name": config.name,
             "bootstrap_servers": config.bootstrap_servers,
             "security_protocol": config.security_protocol,
-            "readonly": config.readonly,
+            "viewonly": config.viewonly,
             "authentication": {
                 "sasl_mechanism": config.sasl_mechanism,
                 "has_credentials": bool(config.sasl_username),
@@ -247,7 +247,7 @@ async def list_clusters() -> List[Dict[str, Any]]:
                     "name": name,
                     "bootstrap_servers": config.bootstrap_servers,
                     "security_protocol": config.security_protocol,
-                    "readonly": config.readonly,
+                    "viewonly": config.viewonly,
                     "topics_count": len(metadata.topics),
                     "brokers_count": len(metadata.brokers),
                     "status": "healthy",
@@ -258,7 +258,7 @@ async def list_clusters() -> List[Dict[str, Any]]:
                 {
                     "name": name,
                     "bootstrap_servers": config.bootstrap_servers,
-                    "readonly": config.readonly,
+                    "viewonly": config.viewonly,
                     "status": "error",
                     "error": str(e),
                 }
@@ -533,7 +533,7 @@ async def get_cluster_metadata(cluster: Optional[str] = None) -> Dict[str, Any]:
         return {
             "cluster_name": config.name,
             "bootstrap_servers": config.bootstrap_servers,
-            "readonly": config.readonly,
+            "viewonly": config.viewonly,
             "cluster_id": metadata.cluster_id,
             "controller_id": metadata.controller_id,
             "brokers": {"count": len(metadata.brokers), "ids": list(metadata.brokers.keys())},

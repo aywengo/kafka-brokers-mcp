@@ -32,7 +32,7 @@ Available Clusters:
     "name": "development",
     "bootstrap_servers": "localhost:9092",
     "security_protocol": "PLAINTEXT",
-    "readonly": false,
+    "viewonly": false,
     "topics_count": 8,
     "brokers_count": 1,
     "status": "healthy"
@@ -71,7 +71,7 @@ python scripts/create_test_data.py production
 - **Sample Messages**: Realistic JSON messages for each topic type
 
 **Features**:
-- Respects readonly mode settings
+- Respects viewonly mode settings
 - Configurable partition counts and retention policies
 - Produces realistic sample data
 - Creates consumer groups with different consumption patterns
@@ -85,19 +85,19 @@ Both scripts use the same environment configuration as the main MCP server:
 ```bash
 export KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
 export KAFKA_SECURITY_PROTOCOL="PLAINTEXT"
-export READONLY="false"
+export VIEWONLY="false"
 ```
 
 ### Multi-Cluster
 ```bash
 export KAFKA_CLUSTER_NAME_1="development"
 export KAFKA_BOOTSTRAP_SERVERS_1="dev-kafka:9092"
-export READONLY_1="false"
+export VIEWONLY_1="false"
 
 export KAFKA_CLUSTER_NAME_2="production"
 export KAFKA_BOOTSTRAP_SERVERS_2="prod-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL_2="SASL_SSL"
-export READONLY_2="true"
+export VIEWONLY_2="true"
 ```
 
 ## Development Workflow
@@ -114,7 +114,7 @@ cd tests
 # Configure for test environment
 export KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
 export KAFKA_SECURITY_PROTOCOL="PLAINTEXT"
-export READONLY="false"
+export VIEWONLY="false"
 
 # Create sample data
 python scripts/create_test_data.py
@@ -173,13 +173,13 @@ python scripts/test_mcp_tools.py
 ### Production Validation
 
 ```bash
-# Test against production (readonly)
+# Test against production (viewonly)
 export KAFKA_BOOTSTRAP_SERVERS="prod-kafka:9092"
 export KAFKA_SECURITY_PROTOCOL="SASL_SSL"
 export KAFKA_SASL_MECHANISM="SCRAM-SHA-256"
-export KAFKA_SASL_USERNAME="readonly-user"
+export KAFKA_SASL_USERNAME="viewonly-user"
 export KAFKA_SASL_PASSWORD="password"
-export READONLY="true"
+export VIEWONLY="true"
 
 python scripts/test_mcp_tools.py
 ```
@@ -214,7 +214,7 @@ python scripts/create_test_data.py staging
 ```
 
 **Safety Features**:
-- Warns if cluster is in readonly mode
+- Warns if cluster is in viewonly mode
 - Checks for existing topics before creation
 - Validates cluster connectivity before proceeding
 
@@ -295,7 +295,7 @@ When adding new scripts:
 ## Best Practices
 
 1. **Always test locally first** before running against production
-2. **Use readonly mode** for production environments
+2. **Use viewonly mode** for production environments
 3. **Validate environment** configuration before running scripts
 4. **Check connectivity** before creating resources
 5. **Clean up test data** when no longer needed

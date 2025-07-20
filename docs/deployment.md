@@ -14,7 +14,7 @@ docker pull aywengo/kafka-brokers-mcp:stable
 docker run -d \
   -e KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
   -e KAFKA_SECURITY_PROTOCOL=PLAINTEXT \
-  -e READONLY=false \
+  -e VIEWONLY=false \
   aywengo/kafka-brokers-mcp:stable
 ```
 
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 # Configure environment
 export KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
 export KAFKA_SECURITY_PROTOCOL="PLAINTEXT"
-export READONLY="false"
+export VIEWONLY="false"
 
 # Run the server
 python kafka_brokers_unified_mcp.py
@@ -54,7 +54,7 @@ services:
       - KAFKA_CLUSTER_NAME_1=development
       - KAFKA_BOOTSTRAP_SERVERS_1=dev-kafka:9092
       - KAFKA_SECURITY_PROTOCOL_1=PLAINTEXT
-      - READONLY_1=false
+      - VIEWONLY_1=false
       
       - KAFKA_CLUSTER_NAME_2=production
       - KAFKA_BOOTSTRAP_SERVERS_2=prod-kafka:9092
@@ -62,7 +62,7 @@ services:
       - KAFKA_SASL_MECHANISM_2=SCRAM-SHA-256
       - KAFKA_SASL_USERNAME_2=prod-user
       - KAFKA_SASL_PASSWORD_2=${PROD_KAFKA_PASSWORD}
-      - READONLY_2=true
+      - VIEWONLY_2=true
     ports:
       - "38001:8000"
     healthcheck:
@@ -128,7 +128,7 @@ spec:
             secretKeyRef:
               name: kafka-credentials
               key: password
-        - name: READONLY
+        - name: VIEWONLY
           value: "true"
         resources:
           requests:
@@ -205,7 +205,7 @@ kafka:
       bootstrapServers: prod-kafka:9092
       securityProtocol: SASL_SSL
       saslMechanism: SCRAM-SHA-256
-      readonly: true
+                    viewonly: true
       credentials:
         existingSecret: kafka-prod-credentials
         usernameKey: username
@@ -263,7 +263,7 @@ healthCheck:
           "value": "SASL_SSL"
         },
         {
-          "name": "READONLY",
+                          "name": "VIEWONLY",
           "value": "true"
         }
       ],
@@ -307,7 +307,7 @@ gcloud run deploy kafka-brokers-mcp \
   --image=aywengo/kafka-brokers-mcp:stable \
   --platform=managed \
   --region=us-central1 \
-  --set-env-vars="KAFKA_BOOTSTRAP_SERVERS=kafka-cluster:9092,KAFKA_SECURITY_PROTOCOL=SASL_SSL,READONLY=true" \
+  --set-env-vars="KAFKA_BOOTSTRAP_SERVERS=kafka-cluster:9092,KAFKA_SECURITY_PROTOCOL=SASL_SSL,VIEWONLY=true" \
   --set-secrets="KAFKA_SASL_USERNAME=kafka-username:latest,KAFKA_SASL_PASSWORD=kafka-password:latest" \
   --port=8000 \
   --memory=1Gi \
@@ -335,7 +335,7 @@ properties:
         value: kafka-cluster.eastus.cloudapp.azure.com:9092
       - name: KAFKA_SECURITY_PROTOCOL
         value: SASL_SSL
-      - name: READONLY
+      - name: VIEWONLY
         value: "true"
       - name: KAFKA_SASL_USERNAME
         secureValue: "{{kafka-username}}"

@@ -10,28 +10,28 @@
         "-e", "KAFKA_CLUSTER_NAME_1",
         "-e", "KAFKA_BOOTSTRAP_SERVERS_1",
         "-e", "KAFKA_SECURITY_PROTOCOL_1",
-        "-e", "READONLY_1",
+        "-e", "VIEWONLY_1",
         "-e", "KAFKA_CLUSTER_NAME_2",
         "-e", "KAFKA_BOOTSTRAP_SERVERS_2",
         "-e", "KAFKA_SECURITY_PROTOCOL_2",
         "-e", "KAFKA_SASL_MECHANISM_2",
         "-e", "KAFKA_SASL_USERNAME_2",
         "-e", "KAFKA_SASL_PASSWORD_2",
-        "-e", "READONLY_2",
+        "-e", "VIEWONLY_2",
         "aywengo/kafka-brokers-mcp:stable"
       ],
       "env": {
         "KAFKA_CLUSTER_NAME_1": "development",
         "KAFKA_BOOTSTRAP_SERVERS_1": "localhost:9092",
         "KAFKA_SECURITY_PROTOCOL_1": "PLAINTEXT",
-        "READONLY_1": "false",
+        "VIEWONLY_1": "false",
         "KAFKA_CLUSTER_NAME_2": "production",
         "KAFKA_BOOTSTRAP_SERVERS_2": "prod-kafka:9092",
         "KAFKA_SECURITY_PROTOCOL_2": "SASL_SSL",
         "KAFKA_SASL_MECHANISM_2": "SCRAM-SHA-256",
         "KAFKA_SASL_USERNAME_2": "prod-user",
         "KAFKA_SASL_PASSWORD_2": "prod-password",
-        "READONLY_2": "true"
+        "VIEWONLY_2": "true"
       }
     }
   }

@@ -31,7 +31,7 @@ class TestMultiClusterConfiguration:
             'KAFKA_CLUSTER_NAME_1': 'development',
             'KAFKA_BOOTSTRAP_SERVERS_1': 'dev-kafka:9092',
             'KAFKA_SECURITY_PROTOCOL_1': 'PLAINTEXT',
-            'READONLY_1': 'false',
+            'VIEWONLY_1': 'false',
             
             'KAFKA_CLUSTER_NAME_2': 'staging',
             'KAFKA_BOOTSTRAP_SERVERS_2': 'staging-kafka:9092',
@@ -39,7 +39,7 @@ class TestMultiClusterConfiguration:
             'KAFKA_SASL_MECHANISM_2': 'PLAIN',
             'KAFKA_SASL_USERNAME_2': 'staging-user',
             'KAFKA_SASL_PASSWORD_2': 'staging-password',
-            'READONLY_2': 'false',
+            'VIEWONLY_2': 'false',
             
             'KAFKA_CLUSTER_NAME_3': 'production',
             'KAFKA_BOOTSTRAP_SERVERS_3': 'prod-kafka:9092',
@@ -47,7 +47,7 @@ class TestMultiClusterConfiguration:
             'KAFKA_SASL_MECHANISM_3': 'SCRAM-SHA-256',
             'KAFKA_SASL_USERNAME_3': 'prod-user',
             'KAFKA_SASL_PASSWORD_3': 'prod-password',
-            'READONLY_3': 'true',
+            'VIEWONLY_3': 'true',
         }, clear=True):
             manager = load_cluster_configurations()
             
@@ -59,14 +59,14 @@ class TestMultiClusterConfiguration:
             assert dev_config.name == 'development'
             assert dev_config.bootstrap_servers == 'dev-kafka:9092'
             assert dev_config.security_protocol == 'PLAINTEXT'
-            assert dev_config.readonly is False
+            assert dev_config.viewonly is False
             
             staging_config = manager.get_cluster_config('staging')
             assert staging_config.name == 'staging'
             assert staging_config.bootstrap_servers == 'staging-kafka:9092'
             assert staging_config.security_protocol == 'SASL_PLAINTEXT'
             assert staging_config.sasl_mechanism == 'PLAIN'
-            assert staging_config.readonly is False
+            assert staging_config.viewonly is False
             
             prod_config = manager.get_cluster_config('production')
             assert prod_config.name == 'production'
@@ -75,7 +75,7 @@ class TestMultiClusterConfiguration:
             assert prod_config.sasl_mechanism == 'SCRAM-SHA-256'
             assert prod_config.sasl_username == 'prod-user'
             assert prod_config.sasl_password == 'prod-password'
-            assert prod_config.readonly is True
+            assert prod_config.viewonly is True
     
     def test_partial_cluster_configuration(self):
         """Test loading when only some clusters are configured."""
@@ -188,12 +188,12 @@ class TestMultiClusterOperations:
             'KAFKA_CLUSTER_NAME_1': 'cluster1',
             'KAFKA_BOOTSTRAP_SERVERS_1': 'localhost:9092',
             'KAFKA_SECURITY_PROTOCOL_1': 'PLAINTEXT',
-            'READONLY_1': 'false',
+            'VIEWONLY_1': 'false',
             
             'KAFKA_CLUSTER_NAME_2': 'cluster2',
             'KAFKA_BOOTSTRAP_SERVERS_2': 'localhost:9093',
             'KAFKA_SECURITY_PROTOCOL_2': 'PLAINTEXT',
-            'READONLY_2': 'false',
+            'VIEWONLY_2': 'false',
         }, clear=True)
         self.env_patch.start()
         
@@ -275,30 +275,30 @@ class TestMultiClusterOperations:
         if cluster_id_1 and cluster_id_2:
             assert cluster_id_1 != cluster_id_2
     
-    def test_readonly_mode_per_cluster(self):
-        """Test that readonly mode can be set per cluster."""
-        # Check readonly status for each cluster
-        cluster1_readonly = self.manager.is_readonly('cluster1')
-        cluster2_readonly = self.manager.is_readonly('cluster2')
+    def test_viewonly_mode_per_cluster(self):
+        """Test that viewonly mode can be set per cluster."""
+        # Check viewonly status for each cluster
+        cluster1_viewonly = self.manager.is_viewonly('cluster1')
+        cluster2_viewonly = self.manager.is_viewonly('cluster2')
         
         # Based on our configuration, both should be writable
-        assert cluster1_readonly is False
-        assert cluster2_readonly is False
+        assert cluster1_viewonly is False
+        assert cluster2_viewonly is False
         
-        # Test configuration with mixed readonly settings
+        # Test configuration with mixed viewonly settings
         with patch.dict(os.environ, {
             'KAFKA_CLUSTER_NAME_1': 'dev',
             'KAFKA_BOOTSTRAP_SERVERS_1': 'localhost:9092',
-            'READONLY_1': 'false',
+            'VIEWONLY_1': 'false',
             
             'KAFKA_CLUSTER_NAME_2': 'prod',
             'KAFKA_BOOTSTRAP_SERVERS_2': 'localhost:9093',
-            'READONLY_2': 'true',  # Production is readonly
+            'VIEWONLY_2': 'true',  # Production is viewonly
         }, clear=True):
             mixed_manager = load_cluster_configurations()
             
-            assert mixed_manager.is_readonly('dev') is False
-            assert mixed_manager.is_readonly('prod') is True
+            assert mixed_manager.is_viewonly('dev') is False
+            assert mixed_manager.is_viewonly('prod') is True
 
 class TestMultiClusterErrorHandling:
     """Test error handling in multi-cluster scenarios."""

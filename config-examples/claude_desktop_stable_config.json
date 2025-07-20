@@ -12,13 +12,13 @@
         "-e", "KAFKA_SASL_MECHANISM",
         "-e", "KAFKA_SASL_USERNAME",
         "-e", "KAFKA_SASL_PASSWORD",
-        "-e", "READONLY",
+        "-e", "VIEWONLY",
         "aywengo/kafka-brokers-mcp:stable"
       ],
       "env": {
         "KAFKA_BOOTSTRAP_SERVERS": "localhost:9092",
         "KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
-        "READONLY": "false"
+        "VIEWONLY": "false"
       }
     }
   }
