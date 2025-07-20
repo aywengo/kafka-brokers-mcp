@@ -51,7 +51,8 @@ jobs:
     
     - name: Check code formatting with black
       run: |
-        black --check --diff . || (echo "Code formatting issues found. Run 'black .' to fix." && exit 1)
+        # Only check the main module and scripts directory, excluding tests as per pyproject.toml
+        black --check --diff kafka_brokers_unified_mcp.py scripts/ || (echo "Code formatting issues found. Run 'black kafka_brokers_unified_mcp.py scripts/' to fix." && exit 1)
     
     - name: Type checking with mypy
       run: |
