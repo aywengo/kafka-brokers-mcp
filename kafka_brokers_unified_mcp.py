@@ -7,8 +7,9 @@ Supports single and multi-cluster configurations with viewonly mode protection.
 
 import logging
 import sys
+import os
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 # Import modules
 from kafka_cluster_manager import load_cluster_configurations
@@ -172,8 +173,17 @@ def main():
             except Exception as e:
                 logger.warning(f"Failed to connect to cluster '{name}': {e}")
 
-        # Run the MCP server
-        mcp.run()
+        # Determine transport from environment
+        transport = os.environ.get("MCP_TRANSPORT", "stdio").lower()
+        
+        if transport == "http":
+            # HTTP transport for MCP inspector access
+            logger.info("Starting MCP server with HTTP transport on default 0.0.0.0:8000")
+            mcp.run(transport="http")
+        else:
+            # Default stdio transport for Claude Desktop
+            logger.info("Starting MCP server with stdio transport")
+            mcp.run()
 
     except KeyboardInterrupt:
         logger.info("Shutting down...")

@@ -175,6 +175,65 @@ services:
     networks:
       - kafka-test-network
 
+  # MCP Server for Kafka operations
+  kafka-mcp-server:
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+    container_name: kafka-mcp-server
+    depends_on:
+      kafka-dev:
+        condition: service_healthy
+    environment:
+      # Multi-cluster configuration
+      KAFKA_CLUSTER_NAME_1: "dev"
+      KAFKA_BOOTSTRAP_SERVERS_1: "kafka-dev:9092"
+      KAFKA_SECURITY_PROTOCOL_1: "PLAINTEXT"
+      KAFKA_CLUSTER_NAME_2: "prod"
+      KAFKA_BOOTSTRAP_SERVERS_2: "kafka-prod:9093"
+      KAFKA_SECURITY_PROTOCOL_2: "PLAINTEXT"
+      VIEWONLY_1: "false"
+      VIEWONLY_2: "false"
+      PYTHONPATH: "/app"
+    working_dir: /app
+    command: ["python", "kafka_brokers_unified_mcp.py"]
+    networks:
+      - kafka-test-network
+    volumes:
+      - ..:/app:ro  # Mount source code as read-only
+
+  # MCP Server with HTTP transport for MCP Inspector access
+  kafka-mcp-server-http:
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+    container_name: kafka-mcp-server-http
+    depends_on:
+      kafka-dev:
+        condition: service_healthy
+    ports:
+      - "8000:8000"  # HTTP port for MCP inspector
+    environment:
+      # Multi-cluster configuration
+      KAFKA_CLUSTER_NAME_1: "dev"
+      KAFKA_BOOTSTRAP_SERVERS_1: "kafka-dev:9092"
+      KAFKA_SECURITY_PROTOCOL_1: "PLAINTEXT"
+      KAFKA_CLUSTER_NAME_2: "prod"
+      KAFKA_BOOTSTRAP_SERVERS_2: "kafka-prod:9093"
+      KAFKA_SECURITY_PROTOCOL_2: "PLAINTEXT"
+      VIEWONLY_1: "false"
+      VIEWONLY_2: "false"
+      PYTHONPATH: "/app"
+      MCP_TRANSPORT: "http"
+      MCP_SERVER_HOST: "0.0.0.0"
+      MCP_SERVER_PORT: "8000"
+    working_dir: /app
+    command: ["python", "kafka_brokers_unified_mcp.py"]
+    networks:
+      - kafka-test-network
+    volumes:
+      - ..:/app:ro  # Mount source code as read-only
+
 networks:
   kafka-test-network:
     name: kafka-test-network
