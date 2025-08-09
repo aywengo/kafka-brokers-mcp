@@ -175,7 +175,7 @@ def main():
 
         # Determine transport from environment
         transport = os.environ.get("MCP_TRANSPORT", "stdio").lower()
-        
+
         if transport == "http":
             # HTTP transport for MCP inspector access
             logger.info("Starting MCP server with HTTP transport on default 0.0.0.0:8000")

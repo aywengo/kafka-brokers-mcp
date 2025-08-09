@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-LABEL maintainer="aywengo"
+LABEL maintainer="aywengo@gmail.com"
 LABEL description="Kafka Brokers MCP Server - A comprehensive MCP server for Kafka broker operations"
 LABEL version="1.0.0"
 
@@ -10,6 +10,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
