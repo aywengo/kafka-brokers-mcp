@@ -2,11 +2,11 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
-  release:
-    types: [ published ]
 
 env:
   REGISTRY: docker.io
@@ -161,7 +161,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     needs: [test, security-scan, build-and-test-docker]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
     - name: Checkout code
@@ -182,10 +182,7 @@ jobs:
       with:
         images: ${{ env.IMAGE_NAME }}
         tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=ref,event=tag
     
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -198,53 +195,10 @@ jobs:
         cache-to: type=gha,mode=max
         platforms: linux/amd64,linux/arm64
 
-  release:
-    runs-on: ubuntu-latest
-    needs: [test, security-scan, build-and-test-docker]
-    if: github.event_name == 'release'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    - name: Extract release version
-      id: version
-      run: |
-        echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-    
-    - name: Build and push release image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
-          ${{ env.IMAGE_NAME }}:stable
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        platforms: linux/amd64,linux/arm64
-    
-    - name: Update Docker Hub description
-      uses: peter-evans/dockerhub-description@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ env.IMAGE_NAME }}
-        readme-filepath: ./README.md
-
   integration-test:
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
     - name: Checkout code
@@ -259,10 +213,11 @@ jobs:
         # Ensure docker compose is available (V2)
         docker compose version || (echo "Installing docker-compose" && sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose)
     
-    - name: Test latest Docker image
+    - name: Test release Docker image
       run: |
-        # Pull the latest image
-        docker pull ${{ env.IMAGE_NAME }}:latest
+        # Determine tag from ref and pull the image
+        TAG="${GITHUB_REF#refs/tags/}"
+        docker pull ${{ env.IMAGE_NAME }}:${TAG}
         
         # Start a test environment
         cd tests
@@ -273,7 +228,7 @@ jobs:
         docker run --rm --network host \
           -e KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
           -e KAFKA_SECURITY_PROTOCOL=PLAINTEXT \
-          ${{ env.IMAGE_NAME }}:latest &
+          ${{ env.IMAGE_NAME }}:${TAG} &
         
         # Give it time to start
         sleep 10
