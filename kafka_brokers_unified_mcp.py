@@ -173,13 +173,21 @@ def main():
             except Exception as e:
                 logger.warning(f"Failed to connect to cluster '{name}': {e}")
 
-        # Determine transport from environment
+        # Determine transport and optional HTTP host/port from environment
         transport = os.environ.get("MCP_TRANSPORT", "stdio").lower()
 
         if transport == "http":
+            http_host = os.environ.get("MCP_SERVER_HOST", "0.0.0.0")
+            http_port_str = os.environ.get("MCP_SERVER_PORT", "8000")
+            try:
+                http_port = int(http_port_str)
+            except ValueError:
+                logger.warning(f"Invalid MCP_SERVER_PORT '{http_port_str}', defaulting to 8000")
+                http_port = 8000
+
             # HTTP transport for MCP inspector access
-            logger.info("Starting MCP server with HTTP transport on default 0.0.0.0:8000")
-            mcp.run(transport="http")
+            logger.info(f"Starting MCP server with HTTP transport on {http_host}:{http_port}")
+            mcp.run(transport="http", host=http_host, port=http_port)
         else:
             # Default stdio transport for Claude Desktop
             logger.info("Starting MCP server with stdio transport")

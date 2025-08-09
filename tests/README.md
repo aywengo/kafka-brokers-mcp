@@ -1,6 +1,6 @@
 # Testing Guide
 
-This directory contains comprehensive testing infrastructure for the Kafka Brokers MCP Server. The setup includes multi-cluster Kafka environments, AKHQ UI monitoring, and MCP inspector access for development and testing.
+This directory contains comprehensive testing infrastructure for the Kafka Brokers MCP Server. The setup includes multi-cluster Kafka environments and AKHQ UI monitoring for development and testing.
 
 ## Quick Start
 
@@ -19,14 +19,10 @@ This directory contains comprehensive testing infrastructure for the Kafka Broke
 
 ### Access MCP Inspector
 
-The test environment includes an HTTP-enabled MCP server for interactive testing:
+The test environment includes an HTTP-enabled MCP server for interactive testing. You can use either the CLI Inspector or the MCPJam Inspector (web UI):
 
 ```bash
-# Quick access via helper script
-./open_mcp_inspector.sh
-
-# Or manually launch the inspector
-npx @modelcontextprotocol/inspector http://localhost:8000
+# Tip: 404 on GET / at http://localhost:8000 is expected; MCP uses POST endpoints.
 ```
 
 **MCP Inspector Features:**
@@ -53,13 +49,14 @@ npx @modelcontextprotocol/inspector http://localhost:8000
 | **kafka-mcp-server** | MCP server (stdio transport) | Docker container |
 | **kafka-mcp-server-http** | MCP server (HTTP transport) | http://localhost:8000 |
 | **akhq** | Kafka UI dashboard | http://localhost:38080 |
+|  |  |  |
 
 ### MCP Server Access
 
 The test environment provides two MCP server instances:
 
 1. **Stdio Transport** (`kafka-mcp-server`): For Claude Desktop integration
-2. **HTTP Transport** (`kafka-mcp-server-http`): For MCP Inspector and web-based testing
+2. **HTTP Transport** (`kafka-mcp-server-http`): For HTTP-based clients
 
 Both servers connect to the same Kafka clusters and provide identical functionality.
 
@@ -70,9 +67,6 @@ Both servers connect to the same Kafka clusters and provide identical functional
 ```bash
 # Start environment with UI
 ./start_test_environment.sh ui
-
-# Open MCP Inspector for tool testing
-./open_mcp_inspector.sh
 
 # Monitor Kafka with AKHQ
 open http://localhost:38080
@@ -143,6 +137,8 @@ docker compose -f docker-compose.yml logs -f kafka-mcp-server-http
 # Restart HTTP MCP server only
 docker compose -f docker-compose.yml restart kafka-mcp-server-http
 ```
+
+ 
 
 #### Kafka Connection Issues
 

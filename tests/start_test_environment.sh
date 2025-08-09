@@ -179,6 +179,7 @@ echo -e "${BLUE}   🔗 http://localhost:8000${NC}"
 echo "   • Interactive testing and debugging interface"
 echo "   • Explore tools, resources, and server capabilities"
 echo "   • Test MCP operations with custom parameters"
+echo "   • Note: GET / returns 404 by design; use an MCP client to connect"
 if [[ "$MODE" == "ui" ]]; then
     echo ""
     echo -e "${GREEN}🌐 AKHQ Kafka UI Dashboard:${NC}"
@@ -196,7 +197,7 @@ echo "  MCP server logs: $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f kafka-mcp-serv
 echo "  HTTP MCP server status: $DOCKER_COMPOSE -f $COMPOSE_FILE ps kafka-mcp-server-http"
 echo "  HTTP MCP server logs: $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f kafka-mcp-server-http"
 echo "  Test MCP server: curl http://localhost:8000/"
-echo "  Open MCP inspector: npx @modelcontextprotocol/inspector http://localhost:8000"
+echo "  Open MCP inspector (classic): npx @modelcontextprotocol/inspector"
 if [[ "$MODE" == "ui" ]]; then
     echo "  Open AKHQ: open http://localhost:38080 (macOS) or xdg-open http://localhost:38080 (Linux)"
 fi
