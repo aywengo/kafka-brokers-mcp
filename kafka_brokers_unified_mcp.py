@@ -62,9 +62,11 @@ async def get_consumer_groups_resource() -> str:
 async def get_partitions_resource() -> str:
     return await resources.get_partitions_resource()
 
+
 @mcp.resource("kafka://partitions")
 async def get_partitions_resource() -> str:
     return await resources.get_partitions_resource()
+
 
 @mcp.resource("kafka://brokers/{name}")
 async def get_cluster_brokers_resource(name: str) -> str:
