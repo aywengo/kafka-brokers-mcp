@@ -7,8 +7,10 @@ Supports single and multi-cluster configurations with viewonly mode protection.
 
 import logging
 import sys
+import os
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
+
 
 # Import modules
 from kafka_cluster_manager import load_cluster_configurations
@@ -54,6 +56,11 @@ async def get_topics_resource() -> str:
 @mcp.resource("kafka://consumer-groups")
 async def get_consumer_groups_resource() -> str:
     return await resources.get_consumer_groups_resource()
+
+
+@mcp.resource("kafka://partitions")
+async def get_partitions_resource() -> str:
+    return await resources.get_partitions_resource()
 
 
 @mcp.resource("kafka://partitions")
@@ -172,8 +179,25 @@ def main():
             except Exception as e:
                 logger.warning(f"Failed to connect to cluster '{name}': {e}")
 
-        # Run the MCP server
-        mcp.run()
+        # Determine transport and optional HTTP host/port from environment
+        transport = os.environ.get("MCP_TRANSPORT", "stdio").lower()
+
+        if transport == "http":
+            http_host = os.environ.get("MCP_SERVER_HOST", "0.0.0.0")
+            http_port_str = os.environ.get("MCP_SERVER_PORT", "8000")
+            try:
+                http_port = int(http_port_str)
+            except ValueError:
+                logger.warning(f"Invalid MCP_SERVER_PORT '{http_port_str}', defaulting to 8000")
+                http_port = 8000
+
+            # HTTP transport for MCP inspector access
+            logger.info(f"Starting MCP server with HTTP transport on {http_host}:{http_port}")
+            mcp.run(transport="http", host=http_host, port=http_port)
+        else:
+            # Default stdio transport for Claude Desktop
+            logger.info("Starting MCP server with stdio transport")
+            mcp.run()
 
     except KeyboardInterrupt:
         logger.info("Shutting down...")

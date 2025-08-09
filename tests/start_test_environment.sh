@@ -53,17 +53,17 @@ case $MODE in
     "dev")
         echo -e "${BLUE}🔧 Starting single Kafka cluster...${NC}"
         COMPOSE_FILE="docker-compose.yml"
-        SERVICES="kafka-dev"
+        SERVICES="kafka-dev kafka-mcp-server kafka-mcp-server-http"
         ;;
     "multi")
         echo -e "${BLUE}🔧 Starting multiple Kafka clusters...${NC}"
         COMPOSE_FILE="docker-compose.yml"
-        SERVICES="kafka-dev kafka-prod"
+        SERVICES="kafka-dev kafka-prod kafka-mcp-server kafka-mcp-server-http"
         ;;
     "ui")
         echo -e "${BLUE}🔧 Starting multiple clusters with UI...${NC}"
         COMPOSE_FILE="docker-compose.yml"
-        SERVICES="kafka-dev kafka-prod akhq"
+        SERVICES="kafka-dev kafka-prod akhq kafka-mcp-server kafka-mcp-server-http"
         ;;
     *)
         echo -e "${RED}❌ Invalid mode: $MODE${NC}"
@@ -105,6 +105,30 @@ if [[ "$MODE" == "multi" || "$MODE" == "ui" ]]; then
     done
 fi
 
+# Wait for MCP server to be ready
+echo -e "${BLUE}🔍 Waiting for MCP server...${NC}"
+count=0
+while ! $DOCKER_COMPOSE -f "$COMPOSE_FILE" exec -T kafka-mcp-server pgrep -f kafka_brokers_unified_mcp.py >/dev/null 2>&1; do
+    sleep 2
+    count=$((count + 1))
+    if [ $count -gt $((timeout / 2)) ]; then
+        echo -e "${RED}❌ MCP server failed to start within ${timeout}s${NC}"
+        exit 1
+    fi
+done
+
+# Wait for HTTP MCP server to be ready
+echo -e "${BLUE}🔍 Waiting for HTTP MCP server...${NC}"
+count=0
+while ! $DOCKER_COMPOSE -f "$COMPOSE_FILE" exec -T kafka-mcp-server-http pgrep -f kafka_brokers_unified_mcp.py >/dev/null 2>&1; do
+    sleep 2
+    count=$((count + 1))
+    if [ $count -gt $((timeout / 2)) ]; then
+        echo -e "${RED}❌ HTTP MCP server failed to start within ${timeout}s${NC}"
+        exit 1
+    fi
+done
+
 # Create test topics
 echo -e "${BLUE}📝 Creating test topics...${NC}"
 
@@ -143,11 +167,38 @@ echo "  Kafka Cluster 1 (dev): localhost:9092"
 if [[ "$MODE" == "multi" || "$MODE" == "ui" ]]; then
     echo "  Kafka Cluster 2 (prod): localhost:39093"
 fi
+echo ""
+echo -e "${GREEN}🔧 MCP Server:${NC}"
+echo "   • Running in Docker container: kafka-mcp-server"
+echo "   • Unified access to all Kafka clusters via MCP protocol"
+echo "   • Topic management, consumer groups, and broker operations"
+echo "   • Multi-cluster support with automatic failover"
+echo ""
+echo -e "${GREEN}🔍 MCP Inspector Access:${NC}"
+echo -e "${BLUE}   🔗 http://localhost:8000${NC}"
+echo "   • Interactive testing and debugging interface"
+echo "   • Explore tools, resources, and server capabilities"
+echo "   • Test MCP operations with custom parameters"
+echo "   • Note: GET / returns 404 by design; use an MCP client to connect"
 if [[ "$MODE" == "ui" ]]; then
-    echo "  Kafka UI (AKHQ): http://localhost:38080"
+    echo ""
+    echo -e "${GREEN}🌐 AKHQ Kafka UI Dashboard:${NC}"
+    echo -e "${BLUE}   🔗 http://localhost:38080${NC}"
+    echo "   • Monitor both development and production clusters"
+    echo "   • Browse topics, consumers, and schema registry"
+    echo "   • Send and receive messages interactively"
 fi
 echo ""
 echo -e "${YELLOW}💡 Useful commands:${NC}"
 echo "  Check logs: $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f [service]"
 echo "  List topics: $DOCKER_COMPOSE -f $COMPOSE_FILE exec kafka-dev kafka-topics --bootstrap-server localhost:9092 --list"
+echo "  MCP server status: $DOCKER_COMPOSE -f $COMPOSE_FILE ps kafka-mcp-server"
+echo "  MCP server logs: $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f kafka-mcp-server"
+echo "  HTTP MCP server status: $DOCKER_COMPOSE -f $COMPOSE_FILE ps kafka-mcp-server-http"
+echo "  HTTP MCP server logs: $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f kafka-mcp-server-http"
+echo "  Test MCP server: curl http://localhost:8000/"
+echo "  Open MCP inspector (classic): npx @modelcontextprotocol/inspector"
+if [[ "$MODE" == "ui" ]]; then
+    echo "  Open AKHQ: open http://localhost:38080 (macOS) or xdg-open http://localhost:38080 (Linux)"
+fi
 echo "  Stop environment: ./stop_test_environment.sh"

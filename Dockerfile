@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-LABEL maintainer="aywengo"
+LABEL maintainer="aywengo@gmail.com"
 LABEL description="Kafka Brokers MCP Server - A comprehensive MCP server for Kafka broker operations"
 LABEL version="1.0.0"
 
@@ -10,6 +10,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
@@ -29,10 +30,7 @@ USER kafkamcp
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Expose port
-EXPOSE 8000
+    CMD pgrep -f kafka_brokers_unified_mcp.py || exit 1
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
