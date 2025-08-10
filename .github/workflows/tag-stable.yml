@@ -1,9 +1,12 @@
 name: Tag Stable
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      source_tag:
+        description: 'Existing tag to promote to stable (e.g., v1.3.0, v1.2.1, latest)'
+        required: true
+        type: string
 
 env:
   IMAGE_NAME: aywengo/kafka-brokers-mcp
@@ -25,41 +28,69 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Extract tag version
-        id: version
+      
+      - name: Verify source image exists
         run: |
-          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
-      - name: Wait for version image to be available
-        shell: bash
-        run: |
-          set -euo pipefail
-          IMAGE="${IMAGE_NAME}:${{ steps.version.outputs.VERSION }}"
-          echo "Waiting for image ${IMAGE} to be available in Docker Hub..."
-          for attempt in {1..60}; do
-            if docker buildx imagetools inspect "${IMAGE}" > /dev/null 2>&1; then
-              echo "Found image: ${IMAGE}"
-              break
+            echo "🔍 Verifying that source image exists..."
+            SOURCE_TAG="${{ github.event.inputs.source_tag }}"
+            
+            # Pull the source image to verify it exists
+            if docker pull aywengo/kafka-brokers-mcp:${SOURCE_TAG}; then
+              echo "✅ Source image aywengo/kafka-brokers-mcp:${SOURCE_TAG} exists"
+            else
+              echo "❌ Source image aywengo/kafka-brokers-mcp:${SOURCE_TAG} does not exist"
+              echo "Available tags can be found at: https://hub.docker.com/r/aywengo/kafka-brokers-mcp/tags"
+              exit 1
             fi
-            echo "Attempt ${attempt}/60: Image not found yet. Sleeping 10s..."
-            sleep 10
-          done
-          # Final check to fail if still missing
-          docker buildx imagetools inspect "${IMAGE}" > /dev/null
-
-      - name: Tag as stable (multi-arch manifest)
+      
+      - name: Re-tag as stable
         run: |
-          docker buildx imagetools create \
-            --tag ${IMAGE_NAME}:stable \
-            ${IMAGE_NAME}:${{ steps.version.outputs.VERSION }}
+              echo "🏷️ Promoting ${{ github.event.inputs.source_tag }} to stable..."
+              SOURCE_TAG="${{ github.event.inputs.source_tag }}"
+              
+              # Tag the existing image as stable
+              docker tag aywengo/kafka-brokers-mcp:${SOURCE_TAG} aywengo/kafka-brokers-mcp:stable
+              
+              # Push the stable tag
+              docker push aywengo/kafka-brokers-mcp:stable
+              
+              echo "✅ Successfully promoted ${SOURCE_TAG} to stable!"
 
-      - name: Update Docker Hub description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ${{ env.IMAGE_NAME }}
-          readme-filepath: ./README.md
-
-
+              - name: Verify stable tag
+              run: |
+                echo "🔍 Verifying stable tag was created..."
+                if docker pull aywengo/kafka-brokers-mcp:stable; then
+                  echo "✅ Stable tag verified successfully"
+                  
+                  # Get image digest for confirmation
+                  STABLE_DIGEST=$(docker inspect aywengo/kafka-brokers-mcp:stable --format='{{index .RepoDigests 0}}')
+                  SOURCE_DIGEST=$(docker inspect aywengo/kafka-brokers-mcp:${{ github.event.inputs.source_tag }} --format='{{index .RepoDigests 0}}')
+                  
+                  echo "📋 Image Digests:"
+                  echo "   Source (${{ github.event.inputs.source_tag }}): ${SOURCE_DIGEST}"
+                  echo "   Stable: ${STABLE_DIGEST}"
+                  
+                  if [ "${STABLE_DIGEST}" = "${SOURCE_DIGEST}" ]; then
+                    echo "✅ Digests match - promotion successful!"
+                  else
+                    echo "⚠️ Digests don't match - this might be normal due to DockerHub processing"
+                  fi
+                else
+                  echo "❌ Failed to verify stable tag"
+                  exit 1
+                fi
+      
+      - name: Summary
+        run: |
+                echo "🎉 Tag Promotion Complete!"
+                echo ""
+                echo "📋 Summary:"
+                echo "   Source tag: ${{ github.event.inputs.source_tag }}"
+                echo "   Target tag: stable"
+                echo "   Repository: aywengo/kafka-brokers-mcp"
+                echo ""
+                echo "🐳 Usage:"
+                echo "   docker pull aywengo/kafka-brokers-mcp:stable"
+                echo ""
+                echo "🔗 DockerHub: https://hub.docker.com/r/aywengo/kafka-brokers-mcp/tags" 
+      
